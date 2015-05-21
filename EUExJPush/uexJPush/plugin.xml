@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<uexplugins>
+    <plugin name="uexJPush">
+        
+        <method name="init"></method>
+        <method name="setAliasAndTags"></method>
+        <method name="setAlias"></method>
+        <method name="setTags"></method>
+        <method name="getRegistrationID"></method>
+        <method name="getConnectionState"></method>
+        <method name="addLocalNotification"></method>
+        <method name="removeLocalNotification"></method>
+        <method name="clearLocalNotifications"></method>
+
+        
+    </plugin>
+</uexplugins>

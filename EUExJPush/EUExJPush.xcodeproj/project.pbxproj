@@ -1,0 +1,380 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C62DD7BA1B09854600E7EBD8 /* libPushSDK-1.8.3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C62DD7B91B09854600E7EBD8 /* libPushSDK-1.8.3.a */; };
+		C63A9F201B0987CC00CFD409 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F1F1B0987CC00CFD409 /* CFNetwork.framework */; };
+		C63A9F221B0987D200CFD409 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F211B0987D200CFD409 /* CoreFoundation.framework */; };
+		C63A9F241B0987DA00CFD409 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F231B0987DA00CFD409 /* CoreTelephony.framework */; };
+		C63A9F261B0987E200CFD409 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F251B0987E200CFD409 /* SystemConfiguration.framework */; };
+		C63A9F281B0987E800CFD409 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F271B0987E800CFD409 /* CoreGraphics.framework */; };
+		C63A9F2A1B0987ED00CFD409 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F291B0987ED00CFD409 /* Foundation.framework */; };
+		C63A9F2C1B0987F400CFD409 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F2B1B0987F400CFD409 /* UIKit.framework */; };
+		C63A9F2E1B0987FC00CFD409 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F2D1B0987FC00CFD409 /* Security.framework */; };
+		C63A9F371B0989FF00CFD409 /* EUExJPush.m in Sources */ = {isa = PBXBuildFile; fileRef = C63A9F361B0989FF00CFD409 /* EUExJPush.m */; };
+		C63A9F571B09E27100CFD409 /* JPushInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = C63A9F561B09E27100CFD409 /* JPushInstance.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C62DD77B1B0981AB00E7EBD8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		C62DD77D1B0981AB00E7EBD8 /* libuexJPush.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libuexJPush.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		C62DD7A51B0984C700E7EBD8 /* EUExBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUExBase.h; sourceTree = "<group>"; };
+		C62DD7A61B0984C700E7EBD8 /* EUExBaseDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUExBaseDefine.h; sourceTree = "<group>"; };
+		C62DD7A71B0984C700E7EBD8 /* EUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUtility.h; sourceTree = "<group>"; };
+		C62DD7A81B0984C700E7EBD8 /* WidgetOneDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetOneDelegate.h; sourceTree = "<group>"; };
+		C62DD7B81B09854600E7EBD8 /* APService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APService.h; sourceTree = "<group>"; };
+		C62DD7B91B09854600E7EBD8 /* libPushSDK-1.8.3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libPushSDK-1.8.3.a"; sourceTree = "<group>"; };
+		C63A9F1F1B0987CC00CFD409 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		C63A9F211B0987D200CFD409 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		C63A9F231B0987DA00CFD409 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		C63A9F251B0987E200CFD409 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		C63A9F271B0987E800CFD409 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		C63A9F291B0987ED00CFD409 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		C63A9F2B1B0987F400CFD409 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		C63A9F2D1B0987FC00CFD409 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		C63A9F351B0989FF00CFD409 /* EUExJPush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUExJPush.h; sourceTree = "<group>"; };
+		C63A9F361B0989FF00CFD409 /* EUExJPush.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EUExJPush.m; sourceTree = "<group>"; };
+		C63A9F421B099C0600CFD409 /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		C63A9F551B09E27100CFD409 /* JPushInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPushInstance.h; sourceTree = "<group>"; };
+		C63A9F561B09E27100CFD409 /* JPushInstance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JPushInstance.m; sourceTree = "<group>"; };
+		C6E887961B0C4BD20044D42D /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSON.h; sourceTree = "<group>"; };
+		C6E887971B0C4BD20044D42D /* JSONParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONParser.h; sourceTree = "<group>"; };
+		C6E887981B0C4BD20044D42D /* NSObject+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+SBJSON.h"; sourceTree = "<group>"; };
+		C6E887991B0C4BD20044D42D /* NSString+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SBJSON.h"; sourceTree = "<group>"; };
+		C6E8879A1B0C4BD20044D42D /* SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJSON.h; sourceTree = "<group>"; };
+		C6E8879B1B0C4BD20044D42D /* SBJsonBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonBase.h; sourceTree = "<group>"; };
+		C6E8879C1B0C4BD20044D42D /* SBJsonParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonParser.h; sourceTree = "<group>"; };
+		C6E8879D1B0C4BD20044D42D /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonWriter.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C62DD77A1B0981AB00E7EBD8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C63A9F2E1B0987FC00CFD409 /* Security.framework in Frameworks */,
+				C63A9F2C1B0987F400CFD409 /* UIKit.framework in Frameworks */,
+				C63A9F2A1B0987ED00CFD409 /* Foundation.framework in Frameworks */,
+				C63A9F281B0987E800CFD409 /* CoreGraphics.framework in Frameworks */,
+				C63A9F261B0987E200CFD409 /* SystemConfiguration.framework in Frameworks */,
+				C63A9F241B0987DA00CFD409 /* CoreTelephony.framework in Frameworks */,
+				C63A9F221B0987D200CFD409 /* CoreFoundation.framework in Frameworks */,
+				C63A9F201B0987CC00CFD409 /* CFNetwork.framework in Frameworks */,
+				C62DD7BA1B09854600E7EBD8 /* libPushSDK-1.8.3.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C62DD7741B0981AB00E7EBD8 = {
+			isa = PBXGroup;
+			children = (
+				C62DD7A31B0984C700E7EBD8 /* EUExJPush */,
+				C63A9F1E1B0987B100CFD409 /* Frameworks */,
+				C62DD77E1B0981AB00E7EBD8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C62DD77E1B0981AB00E7EBD8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C62DD77D1B0981AB00E7EBD8 /* libuexJPush.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C62DD7A31B0984C700E7EBD8 /* EUExJPush */ = {
+			isa = PBXGroup;
+			children = (
+				C62DD7A41B0984C700E7EBD8 /* engineHeader */,
+				C62DD7AC1B0984C700E7EBD8 /* sourceCode */,
+				C63A9F351B0989FF00CFD409 /* EUExJPush.h */,
+				C63A9F361B0989FF00CFD409 /* EUExJPush.m */,
+			);
+			path = EUExJPush;
+			sourceTree = "<group>";
+		};
+		C62DD7A41B0984C700E7EBD8 /* engineHeader */ = {
+			isa = PBXGroup;
+			children = (
+				C62DD7A51B0984C700E7EBD8 /* EUExBase.h */,
+				C62DD7A61B0984C700E7EBD8 /* EUExBaseDefine.h */,
+				C62DD7A71B0984C700E7EBD8 /* EUtility.h */,
+				C62DD7A81B0984C700E7EBD8 /* WidgetOneDelegate.h */,
+			);
+			path = engineHeader;
+			sourceTree = "<group>";
+		};
+		C62DD7AC1B0984C700E7EBD8 /* sourceCode */ = {
+			isa = PBXGroup;
+			children = (
+				C6E887951B0C4BD20044D42D /* JSON */,
+				C63A9F421B099C0600CFD409 /* PrefixHeader.pch */,
+				C62DD7B71B09854600E7EBD8 /* lib */,
+				C63A9F551B09E27100CFD409 /* JPushInstance.h */,
+				C63A9F561B09E27100CFD409 /* JPushInstance.m */,
+			);
+			path = sourceCode;
+			sourceTree = "<group>";
+		};
+		C62DD7B71B09854600E7EBD8 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				C62DD7B81B09854600E7EBD8 /* APService.h */,
+				C62DD7B91B09854600E7EBD8 /* libPushSDK-1.8.3.a */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		C63A9F1E1B0987B100CFD409 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C63A9F2D1B0987FC00CFD409 /* Security.framework */,
+				C63A9F2B1B0987F400CFD409 /* UIKit.framework */,
+				C63A9F291B0987ED00CFD409 /* Foundation.framework */,
+				C63A9F271B0987E800CFD409 /* CoreGraphics.framework */,
+				C63A9F251B0987E200CFD409 /* SystemConfiguration.framework */,
+				C63A9F231B0987DA00CFD409 /* CoreTelephony.framework */,
+				C63A9F211B0987D200CFD409 /* CoreFoundation.framework */,
+				C63A9F1F1B0987CC00CFD409 /* CFNetwork.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C6E887951B0C4BD20044D42D /* JSON */ = {
+			isa = PBXGroup;
+			children = (
+				C6E887961B0C4BD20044D42D /* JSON.h */,
+				C6E887971B0C4BD20044D42D /* JSONParser.h */,
+				C6E887981B0C4BD20044D42D /* NSObject+SBJSON.h */,
+				C6E887991B0C4BD20044D42D /* NSString+SBJSON.h */,
+				C6E8879A1B0C4BD20044D42D /* SBJSON.h */,
+				C6E8879B1B0C4BD20044D42D /* SBJsonBase.h */,
+				C6E8879C1B0C4BD20044D42D /* SBJsonParser.h */,
+				C6E8879D1B0C4BD20044D42D /* SBJsonWriter.h */,
+			);
+			path = JSON;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C62DD77C1B0981AB00E7EBD8 /* EUExJPush */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C62DD7911B0981AB00E7EBD8 /* Build configuration list for PBXNativeTarget "EUExJPush" */;
+			buildPhases = (
+				C62DD7791B0981AB00E7EBD8 /* Sources */,
+				C62DD77A1B0981AB00E7EBD8 /* Frameworks */,
+				C62DD77B1B0981AB00E7EBD8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EUExJPush;
+			productName = EUExJPush;
+			productReference = C62DD77D1B0981AB00E7EBD8 /* libuexJPush.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C62DD7751B0981AB00E7EBD8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0630;
+				ORGANIZATIONNAME = AppCan;
+				TargetAttributes = {
+					C62DD77C1B0981AB00E7EBD8 = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
+				};
+			};
+			buildConfigurationList = C62DD7781B0981AB00E7EBD8 /* Build configuration list for PBXProject "EUExJPush" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = C62DD7741B0981AB00E7EBD8;
+			productRefGroup = C62DD77E1B0981AB00E7EBD8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C62DD77C1B0981AB00E7EBD8 /* EUExJPush */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C62DD7791B0981AB00E7EBD8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C63A9F371B0989FF00CFD409 /* EUExJPush.m in Sources */,
+				C63A9F571B09E27100CFD409 /* JPushInstance.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C62DD78F1B0981AB00E7EBD8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CONFIGURATION_BUILD_DIR = $SRCROOT/uexJPush/;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		C62DD7901B0981AB00E7EBD8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CONFIGURATION_BUILD_DIR = $SRCROOT/uexJPush/;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C62DD7921B0981AB00E7EBD8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CODE_SIGN_IDENTITY = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = $SRCROOT/EUExJPush/sourceCode/PrefixHeader.pch;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExJPush/sourceCode/lib",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = uexJPush;
+				PROVISIONING_PROFILE = "";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		C62DD7931B0981AB00E7EBD8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CODE_SIGN_IDENTITY = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = $SRCROOT/EUExJPush/sourceCode/PrefixHeader.pch;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExJPush/sourceCode/lib",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = uexJPush;
+				PROVISIONING_PROFILE = "";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C62DD7781B0981AB00E7EBD8 /* Build configuration list for PBXProject "EUExJPush" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C62DD78F1B0981AB00E7EBD8 /* Debug */,
+				C62DD7901B0981AB00E7EBD8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C62DD7911B0981AB00E7EBD8 /* Build configuration list for PBXNativeTarget "EUExJPush" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C62DD7921B0981AB00E7EBD8 /* Debug */,
+				C62DD7931B0981AB00E7EBD8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C62DD7751B0981AB00E7EBD8 /* Project object */;
+}
