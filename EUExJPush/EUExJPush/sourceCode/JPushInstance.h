@@ -24,7 +24,7 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 
 @property (nonatomic,assign) BOOL connectionState;
 @property (nonatomic,assign) AliasAndTagsConfigStatus configStatus;
-
+@property(nonatomic,strong)NSDictionary *pushLaunchDict;
 
 
 
@@ -55,7 +55,7 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 - (void) callBackJsonWithName:(NSString *)name Object:(id)dict;
 
 -(void)occurrenceCallBack:(NSString*)errorMsg;//测试用回调
-
-
+-(void)onLaunchedByPush:(NSDictionary*)dict;
+-(void)push;
 
 @end

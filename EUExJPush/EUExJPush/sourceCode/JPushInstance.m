@@ -9,11 +9,21 @@
 #import "JPushInstance.h"
 #import "APService.h"
 static JPushInstance *sharedObj = nil;
+
 @implementation JPushInstance
 
 
 
 
+-(void)onLaunchedByPush:(NSDictionary *)dict{
+   self.pushLaunchDict=dict;
+}
+-(void)push{
+    if(self.pushLaunchDict){
+        [JPushInstance callBackRemoteNotification:self.pushLaunchDict];
+        self.pushLaunchDict=nil;
+    }
+}
 
 #pragma mark sharedInstance
 + (instancetype) sharedInstance
@@ -71,7 +81,7 @@ static JPushInstance *sharedObj = nil;
             self.connectionState =NO;
             self.configStatus=Neither;
             [self activateNotifications];
-            
+
         }
         
         return nil;

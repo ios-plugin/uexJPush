@@ -22,7 +22,7 @@
     self = [super initWithBrwView:eInBrwView];
 
     if(self){
-        
+        _JPush=[JPushInstance sharedInstance];
     }
     return  self;
 }
@@ -63,15 +63,40 @@
     
 }
 #pragma mark applicationDelegate
-static NSDictionary *opt;
+
 +(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
-    opt=launchOptions;
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
+        //可以添加自定义categories
+        [APService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
+                                                       UIUserNotificationTypeSound |
+                                                       UIUserNotificationTypeAlert)
+                                           categories:nil];
+    } else {
+        //categories 必须为nil
+        [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                       UIRemoteNotificationTypeSound |
+                                                       UIRemoteNotificationTypeAlert)
+                                           categories:nil];
+    }
+#else
+    //categories 必须为nil
+    [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                   UIRemoteNotificationTypeSound |
+                                                   UIRemoteNotificationTypeAlert)
+                                       categories:nil];
+#endif
+
+    [APService setupWithOption:launchOptions];
+   
 
 
     
-    NSDictionary *remoteNotification = [launchOptions objectForKey: UIApplicationLaunchOptionsRemoteNotificationKey];
+    NSDictionary *remoteNotification = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
     if(remoteNotification){
-        [JPushInstance callBackRemoteNotification:remoteNotification];
+        NSLog(@"onload2");
+        [[JPushInstance sharedInstance] onLaunchedByPush:remoteNotification];
+        //[JPushInstance callBackRemoteNotification:remoteNotification];
 
     }
     
@@ -110,7 +135,9 @@ static NSDictionary *opt;
     completionHandler(UIBackgroundFetchResultNewData);
 }
 
-
++ (void)applicationDidBecomeActive:(UIApplication *)application{
+    [[JPushInstance sharedInstance] push];
+}
 
 
 
@@ -136,8 +163,8 @@ static NSDictionary *opt;
 
 
 -(void)init:(NSMutableArray *)inArguments{
-    
-    _JPush=[JPushInstance sharedInstance];
+ /*
+  
 #if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
     if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
         //可以添加自定义categories
@@ -160,10 +187,10 @@ static NSDictionary *opt;
                                        categories:nil];
 #endif
     
-    [APService setupWithOption:opt];
-    
+    //[APService setupWithOption:opt];
+    [_JPush push];
 
-    
+    */
 }
 
 

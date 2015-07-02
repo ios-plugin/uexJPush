@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version ="3.0.0" build="0">
-        <info>0:极光推送(uexJPush) 插件 for iOS</info>
+        uexName="uexJPush" version="3.0.1" build="1">
+        <info>1:废弃uexJPush.init方法，插件会自动初始化</info>
+        <build>0:极光推送(uexJPush) 插件 for iOS</build>
 
 
     </plugin>
