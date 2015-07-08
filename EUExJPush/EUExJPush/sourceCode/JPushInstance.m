@@ -15,14 +15,13 @@ static JPushInstance *sharedObj = nil;
 
 
 
--(void)onLaunchedByPush:(NSDictionary *)dict{
-   self.pushLaunchDict=dict;
-}
--(void)push{
-    if(self.pushLaunchDict){
-        [JPushInstance callBackRemoteNotification:self.pushLaunchDict];
-        self.pushLaunchDict=nil;
+
+-(void)wake{
+    NSDictionary *remoteNotification = [self.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
+    if(remoteNotification){
+        [self onReceiveNotificationOpen:remoteNotification];
     }
+
 }
 
 #pragma mark sharedInstance
@@ -154,7 +153,16 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 }
 
 //收到APNs推送
-+(void)callBackRemoteNotification:(NSDictionary*)userinfo{
+-(void)callBackRemoteNotification:(NSDictionary*)userinfo{
+    [self callBackJsonWithName:@"onReceiveNotification" Object:[self parseRemoteNotification:userinfo]] ;
+}
+
+     
+-(void)onReceiveNotificationOpen:(NSDictionary*)userinfo{
+    [self callBackJsonWithName:@"onReceiveNotificationOpen" Object:[self parseRemoteNotification:userinfo]];
+}
+
+-(NSDictionary *)parseRemoteNotification:(NSDictionary*)userinfo{
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     NSMutableDictionary *extras=[NSMutableDictionary dictionary];
     NSArray *keys=[userinfo allKeys];
@@ -167,14 +175,11 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     }
     NSDictionary *aps=[userinfo objectForKey:@"aps"];
     [dict setValue:[aps objectForKey:@"alert"] forKey:@"content"];
- 
-    [dict setValue:extras forKey:@"extras"];
-    NSString *result=[dict JSONFragment];
-    NSString *jsSuccessStr = [NSString stringWithFormat:@"if(uexJPush.onReceiveNotification != null){uexJPush.onReceiveNotification('%@');}",result];
-    [EUtility evaluatingJavaScriptInRootWnd:jsSuccessStr];
+    
+    [dict setValue:[extras JSONFragment] forKey:@"extras"];
+    return dict;
+
 }
-
-
 
 
 //收到自定义消息

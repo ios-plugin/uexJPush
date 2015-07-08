@@ -7,6 +7,6 @@
 	<key>CHANNEL</key>
 	<string>Publish channel</string>
 	<key>APP_KEY</key>
-	<string>这里填您申请的APPKEY</string>
+	<string>这里填您申请的AppKey</string>
 </dict>
 </plist>

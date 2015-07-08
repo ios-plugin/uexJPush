@@ -2,7 +2,7 @@
 <uexplugins>
     <plugin
         uexName="uexJPush" version="3.0.1" build="1">
-        <info>1:废弃uexJPush.init方法，插件会自动初始化</info>
+        <info>1:插件会自动初始化；插件支持onReceiveNotificationOpen监听</info>
         <build>0:极光推送(uexJPush) 插件 for iOS</build>
 
 

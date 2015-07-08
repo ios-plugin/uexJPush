@@ -24,7 +24,8 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 
 @property (nonatomic,assign) BOOL connectionState;
 @property (nonatomic,assign) AliasAndTagsConfigStatus configStatus;
-@property(nonatomic,strong)NSDictionary *pushLaunchDict;
+@property(nonatomic,strong)NSDictionary *launchOptions;
+
 
 
 
@@ -50,12 +51,11 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 
 
 
-+(void)callBackRemoteNotification:(NSDictionary*)userinfo;
+-(void)callBackRemoteNotification:(NSDictionary*)userinfo;
 +(void)callBackLocalNotification:(UILocalNotification*)notification;
 - (void) callBackJsonWithName:(NSString *)name Object:(id)dict;
 
 -(void)occurrenceCallBack:(NSString*)errorMsg;//测试用回调
--(void)onLaunchedByPush:(NSDictionary*)dict;
--(void)push;
+-(void)wake;
 
 @end

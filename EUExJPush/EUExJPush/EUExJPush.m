@@ -65,40 +65,12 @@
 #pragma mark applicationDelegate
 
 +(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
-#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
-        //可以添加自定义categories
-        [APService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
-                                                       UIUserNotificationTypeSound |
-                                                       UIUserNotificationTypeAlert)
-                                           categories:nil];
-    } else {
-        //categories 必须为nil
-        [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
-                                                       UIRemoteNotificationTypeSound |
-                                                       UIRemoteNotificationTypeAlert)
-                                           categories:nil];
-    }
-#else
-    //categories 必须为nil
-    [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
-                                                   UIRemoteNotificationTypeSound |
-                                                   UIRemoteNotificationTypeAlert)
-                                       categories:nil];
-#endif
-
-    [APService setupWithOption:launchOptions];
-   
+    
+    [[JPushInstance sharedInstance] setLaunchOptions:launchOptions];
 
 
     
-    NSDictionary *remoteNotification = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
-    if(remoteNotification){
-        NSLog(@"onload2");
-        [[JPushInstance sharedInstance] onLaunchedByPush:remoteNotification];
-        //[JPushInstance callBackRemoteNotification:remoteNotification];
 
-    }
     
     
     
@@ -122,7 +94,7 @@
 
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     
-    [JPushInstance callBackRemoteNotification:userInfo];
+    [[JPushInstance sharedInstance] callBackRemoteNotification:userInfo];
     [APService handleRemoteNotification:userInfo];
 }
 
@@ -130,13 +102,40 @@
     
     
     // IOS 7 Support Required
-    [JPushInstance callBackRemoteNotification:userInfo];
+    [[JPushInstance sharedInstance] callBackRemoteNotification:userInfo];
     [APService handleRemoteNotification:userInfo];
     completionHandler(UIBackgroundFetchResultNewData);
 }
 
 + (void)applicationDidBecomeActive:(UIApplication *)application{
-    [[JPushInstance sharedInstance] push];
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
+        if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
+            //可以添加自定义categories
+            [APService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
+                                                           UIUserNotificationTypeSound |
+                                                           UIUserNotificationTypeAlert)
+                                               categories:nil];
+        } else {
+            //categories 必须为nil
+            [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                           UIRemoteNotificationTypeSound |
+                                                           UIRemoteNotificationTypeAlert)
+                                               categories:nil];
+        }
+#else
+        //categories 必须为nil
+        [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                       UIRemoteNotificationTypeSound |
+                                                       UIRemoteNotificationTypeAlert)
+                                           categories:nil];
+#endif
+        
+        [APService setupWithOption:[JPushInstance sharedInstance].launchOptions];
+        [[JPushInstance sharedInstance] wake];
+    });
+    
 }
 
 
