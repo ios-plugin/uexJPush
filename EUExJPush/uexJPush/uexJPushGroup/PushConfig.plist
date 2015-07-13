@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>APS_FOR_PRODUCTION</key>
-	<string>0</string>
+	<string>$UEXJPUSH_APS_ENVIRONMENT$</string>
 	<key>CHANNEL</key>
-	<string>Publish channel</string>
+	<string>$UEXJPUSH_PUSH_CHANNEL$</string>
 	<key>APP_KEY</key>
 	<string>$UEXJPUSH_APP_KEY$</string>
 </dict>
