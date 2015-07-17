@@ -19,7 +19,8 @@ static JPushInstance *sharedObj = nil;
 -(void)wake{
     NSDictionary *remoteNotification = [self.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
     if(remoteNotification){
-        [self onReceiveNotificationOpen:remoteNotification];
+        [self performSelector:@selector(onReceiveNotificationOpen:) withObject:remoteNotification afterDelay:0.5];
+        //[self onReceiveNotificationOpen:remoteNotification];
     }
 
 }
