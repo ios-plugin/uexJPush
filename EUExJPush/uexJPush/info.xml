@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="3.0.2" build="2">
-        <info>2:添加对config.xml配置的支持</info>
+        uexName="uexJPush" version="3.0.3" build="3">
+        <info>3:修改推送的extras为字典格式</info>
+        <build>2:添加对config.xml配置的支持</build>
         <build>1:插件会自动初始化；插件支持onReceiveNotificationOpen监听</build>
         <build>0:极光推送(uexJPush) 插件 for iOS</build>
 

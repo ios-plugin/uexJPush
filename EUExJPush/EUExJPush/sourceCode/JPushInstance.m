@@ -177,7 +177,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     NSDictionary *aps=[userinfo objectForKey:@"aps"];
     [dict setValue:[aps objectForKey:@"alert"] forKey:@"content"];
     
-    [dict setValue:[extras JSONFragment] forKey:@"extras"];
+    [dict setValue:extras forKey:@"extras"];
     return dict;
 
 }
