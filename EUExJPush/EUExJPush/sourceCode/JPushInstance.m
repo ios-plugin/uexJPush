@@ -319,6 +319,17 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     [APService clearAllLocalNotifications];
 }
 
+#pragma mark badge number
+
+-(void)setBadgeNumber:(NSInteger)bNum{
+    if(bNum<0){
+        return;
+    }
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:bNum];
+    [APService setBadge:bNum];
+}
+
+
 #pragma mark CallBackMethods
 /*
  回调方法name(data)  方法名为name，参数为 字典dict的转成的json字符串

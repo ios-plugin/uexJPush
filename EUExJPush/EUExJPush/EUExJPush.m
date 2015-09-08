@@ -397,7 +397,13 @@
 }
 
 
-
+-(void)setBadgeNumber:(NSMutableArray *)inArguments{
+    NSInteger num=0;
+    if([inArguments count]>0){
+        num=[inArguments[0] integerValue];
+    }
+    [_JPush setBadgeNumber:num];
+}
 
 
 

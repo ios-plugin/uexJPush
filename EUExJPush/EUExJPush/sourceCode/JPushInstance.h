@@ -55,6 +55,9 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 +(void)callBackLocalNotification:(UILocalNotification*)notification;
 - (void) callBackJsonWithName:(NSString *)name Object:(id)dict;
 
+-(void)setBadgeNumber:(NSInteger)bNum;
+
+
 -(void)occurrenceCallBack:(NSString*)errorMsg;//测试用回调
 -(void)wake;
 
