@@ -10,6 +10,7 @@
 
 #import "APService.h"
 #import "JPushInstance.h"
+#import "EUtility.h"
 @interface EUExJPush()
 @property (nonatomic,strong) JPushInstance *JPush;
 
@@ -65,7 +66,7 @@
 #pragma mark applicationDelegate
 
 +(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
-    
+
     [[JPushInstance sharedInstance] setLaunchOptions:launchOptions];
 
 
@@ -82,7 +83,7 @@
 
 
 + (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification{
-    [JPushInstance callBackLocalNotification:notification];
+    [[JPushInstance sharedInstance] callBackLocalNotification:notification];
 }
 + (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     
@@ -134,6 +135,7 @@
         
         [APService setupWithOption:[JPushInstance sharedInstance].launchOptions];
         [[JPushInstance sharedInstance] wake];
+
     });
     
 }
@@ -208,7 +210,7 @@
 
 
 -(void)setAliasAndTags:(NSMutableArray *)inArguments{
-    
+    [EUtility uexPlugin:@"uexJPush" callbackByName:@"onReceiveRegistration" withObject:@{@"test":@"222"} andType:uexPluginCallbackWithJsonString inTarget:meBrwView];
     if([inArguments count]<1) return;
     id info =[self getDataFromJson:inArguments[0]];
     NSString *alias=nil;
@@ -331,28 +333,24 @@
     
     if([inArguments count]<1) return;
     id info =[self getDataFromJson:inArguments[0]];
-
-    NSString *content=nil;
-    if([info objectForKey:@"content"]){
-        content=[info objectForKey:@"content"];
+    if(![info isKindOfClass:[NSDictionary class]]||![info objectForKey:@"broadCastTime"]){
+        return;
     }
     NSDictionary *extras=nil;
     if([info objectForKey:@"extras"]){
         extras=[info objectForKey:@"extras"];
     }
-    NSString *notificationId=nil;
-    if([info objectForKey:@"notificationId"]){
-        notificationId=[NSString stringWithFormat:@"%ld",(long)[info objectForKey:@"notificationId"]];
+    id nid=[info objectForKey:@"notificationId"];
+    if([nid isKindOfClass:[NSNumber class]]){
+        nid=[nid stringValue];
     }
-    NSString *broadCastTime=nil;
-    if([info objectForKey:@"broadCastTime"]){
-        broadCastTime=[info objectForKey:@"broadCastTime"];
-    }
+    NSString *broadCastTime=[info objectForKey:@"broadCastTime"]?:@"0";
     
     [_JPush addLocalNotificationWithbroadCastTime:[NSDate dateWithTimeIntervalSinceNow:([broadCastTime doubleValue]/1000)]
-                                   notificationId:notificationId
-                                          content:content
-                                           extras:extras];
+                                   notificationId:nid?:@"-1"
+                                          content:[info objectForKey:@"content"]?:@""
+                                           extras:[info objectForKey:@"extras"]?:nil
+                                            title:[info objectForKey:@"title"]?:@""];
     
 }
 
@@ -405,6 +403,11 @@
     [_JPush setBadgeNumber:num];
 }
 
-
+-(void)disableLocalNotificationAlertView:(NSMutableArray *)inArguments{
+    if([inArguments count]>0 &&[inArguments[0] integerValue]==1){
+        [JPushInstance sharedInstance].disableLocalNotificationAlertView=YES;
+    }
+    
+}
 
 @end

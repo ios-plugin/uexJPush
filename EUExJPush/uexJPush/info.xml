@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="3.0.4" build="4">
-        <info>4:新增接口setBadgeNumber</info>
+        uexName="uexJPush" version="3.0.5" build="5">
+        <info>5:新增接口disableLocalNotificationAlertView</info>
+        <build>4:新增接口setBadgeNumber</build>
         <build>3:修改推送的extras为字典格式</build>
         <build>2:添加对config.xml配置的支持</build>
         <build>1:插件会自动初始化；插件支持onReceiveNotificationOpen监听</build>
