@@ -404,10 +404,14 @@
 }
 
 -(void)disableLocalNotificationAlertView:(NSMutableArray *)inArguments{
-    if([inArguments count]>0 &&[inArguments[0] integerValue]==1){
-        [JPushInstance sharedInstance].disableLocalNotificationAlertView=YES;
+    if([inArguments count]==0){
+        return;
     }
-    
+    if([inArguments[0] integerValue]==1){
+        [JPushInstance sharedInstance].disableLocalNotificationAlertView=YES;
+    }else{
+        [JPushInstance sharedInstance].disableLocalNotificationAlertView=NO;
+    }
 }
 
 @end
