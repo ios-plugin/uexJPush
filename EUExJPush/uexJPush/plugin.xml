@@ -12,6 +12,7 @@
         <method name="removeLocalNotification"></method>
         <method name="clearLocalNotifications"></method>
         <method name="setBadgeNumber"></method>
+        <method name="disableLocalNotificationAlertView"></method>
 
         
     </plugin>

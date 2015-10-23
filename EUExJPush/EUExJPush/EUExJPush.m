@@ -210,7 +210,6 @@
 
 
 -(void)setAliasAndTags:(NSMutableArray *)inArguments{
-    [EUtility uexPlugin:@"uexJPush" callbackByName:@"onReceiveRegistration" withObject:@{@"test":@"222"} andType:uexPluginCallbackWithJsonString inTarget:meBrwView];
     if([inArguments count]<1) return;
     id info =[self getDataFromJson:inArguments[0]];
     NSString *alias=nil;
