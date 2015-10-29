@@ -393,7 +393,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     
     static NSString *plgName=@"uexJPush";
     uexPluginCallbackType type = uexPluginCallbackWithJsonString;
-    [EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInFrontWindow];
+    [EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
     
     
 
@@ -419,13 +419,12 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 }
 
 -(void)callBack:(NSString *)str{
-    [self performSelector:@selector(delayedCallBack:) withObject:str afterDelay:0.01];
+    //[EUtility evaluatingJavaScriptInRootWnd:str];
+    //[self performSelector:@selector(delayedCallBack:) withObject:str afterDelay:0.01];
     //[meBrwView stringByEvaluatingJavaScriptFromString:str];
 }
 
--(void)delayedCallBack:(NSString *)str{
-    [EUtility evaluatingJavaScriptInRootWnd:str];
-}
+
 
 
 //测试用回调
