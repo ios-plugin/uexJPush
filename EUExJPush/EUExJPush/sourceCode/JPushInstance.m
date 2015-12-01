@@ -10,30 +10,12 @@
 #import "APService.h"
 
 
-
-
-@implementation JPushLocalNotificationData
-- (instancetype)initWithTitle:(NSString *)title content:(NSString *)content extras:(NSDictionary *)extras identifier:(NSString *)identifier ts:(NSString *)ts
-{
-    self = [super init];
-    if (self) {
-        _title=title;
-        _content=content;
-        _extras=extras;
-        _identifier=identifier;
-        _ts=ts;
-    }
-    return self;
-}
+NSString *const uexJPushOnReceiveNotificationCallbackKey=@"onReceiveNotification";
+NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotificationOpen";
 
 
 
-@end
 
-
-@interface JPushInstance()
-@property(nonatomic,strong)NSMutableArray *localNotifications;
-@end
 
 
 @implementation JPushInstance
@@ -43,19 +25,18 @@
 
 
 -(void)wake{
-
     if([self.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey]){
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(500 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-            [self onReceiveNotificationOpen:[self.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey] isAPNs:YES];
+            [self callbackRemoteNotification:[self.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey] state:UIApplicationStateInactive];
         });
     }
     if([self.launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey]){
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(500 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-            [self onReceiveNotificationOpen:[self.launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey] isAPNs:NO];
+            [self callbackLocalNotification:[self.launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey] state:UIApplicationStateInactive];
         });
     }
     
-
+    
 }
 
 #pragma mark sharedInstance
@@ -76,10 +57,10 @@
     
     if (self = [super init]){
         self.connectionState =NO;
-        self.configStatus=Neither;
+        self.configStatus=AliasAndTagsConfigStatusNeither;
         [self activateNotifications];
         self.disableLocalNotificationAlertView=NO;
-        self.localNotifications=[NSMutableArray array];
+
         
     }
     
@@ -153,19 +134,26 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 }
 
 //收到APNs推送
--(void)callBackRemoteNotification:(NSDictionary*)userinfo{
-    [self callBackJsonWithName:@"onReceiveNotification" Object:[self parseRemoteNotification:userinfo]] ;
-}
-
-     
--(void)onReceiveNotificationOpen:(NSDictionary*)userinfo isAPNs:(BOOL)isAPNs{
-    if(isAPNs){
-        [self callBackJsonWithName:@"onReceiveNotificationOpen" Object:[self parseRemoteNotification:userinfo]];
-    }else{
-        [self callBackJsonWithName:@"onReceiveNotificationOpen" Object:[self parseLocalNotification:(UILocalNotification *)userinfo]];
+-(void)callbackRemoteNotification:(NSDictionary*)userinfo state:(UIApplicationState)state{
+    switch (state) {
+        case UIApplicationStateActive: {
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
+            break;
+        }
+        case UIApplicationStateInactive: {
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
+            break;
+        }
+        case UIApplicationStateBackground: {
+            
+            //[self callbackJSONWithName:@"onReceiveNotificationBackground" Object:[self parseRemoteNotification:userinfo]] ;
+            break;
+        }
     }
-
+    
 }
+
+
 
 
 -(NSDictionary *)parseRemoteNotification:(NSDictionary*)userinfo{
@@ -196,7 +184,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     [dict setValue:content forKey:@"message"];
     NSDictionary *extras = [userInfo valueForKey:@"extras"];
     [dict setValue:extras forKey:@"extras"];
-    [self callBackJsonWithName:@"onReceiveMessage" Object:dict];
+    [self callbackJSONWithName:@"onReceiveMessage" Object:dict];
    
 }
 
@@ -204,7 +192,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     self.connectionState=YES;
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     [dict setValue:@"0" forKey:@"connect"];
-    [self callBackJsonWithName:@"onReceiveConnectionChange" Object:dict];
+    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
 
 -(void)networkDidClose:(NSNotification *)notification{
@@ -213,21 +201,21 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     [dict setValue:@"1" forKey:@"connect"];
    
 
-    [self callBackJsonWithName:@"onReceiveConnectionChange" Object:dict];
+    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
 
 -(void)networkDidRegister:(NSNotification *)notification{
-
+    
    
 }
 -(void)networkDidLogin:(NSNotification *)notification{
     NSMutableDictionary *registrationDict=[NSMutableDictionary dictionary];
     [registrationDict setValue:[APService registrationID] forKey:@"title"];
-    [self callBackJsonWithName:@"onReceiveRegistration" Object:registrationDict];
+    [self callbackJSONWithName:@"onReceiveRegistration" Object:registrationDict];
     
 }
 -(void)serviceError:(NSNotification *)notification{
-    [self occurrenceCallBack:[NSString stringWithFormat:@"Service Error : %@",notification.userInfo]];
+    [self occurrenceCallback:[NSString stringWithFormat:@"Service Error : %@",notification.userInfo]];
 }
 
 
@@ -235,31 +223,34 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 
 
 
-#pragma mark alias&tags
+#pragma mark - alias and tags
 - (void)tagsAliasCallback:(int)iResCode
                      tags:(NSSet *)tags
                     alias:(NSString *)alias {
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     [dict setValue:[NSString stringWithFormat:@"%i",iResCode] forKey:@"result"];
     switch (self.configStatus) {
-        case Both:
+        case AliasAndTagsConfigStatusBoth:
             [dict setValue:alias forKey:@"alias"];
             [dict setValue:[tags allObjects] forKey:@"tags"];
-            [self callBackJsonWithName:@"cbSetAliasAndTags" Object:dict];
+            [self callbackJSONWithName:@"cbSetAliasAndTags" Object:dict];
             break;
-        case OnlyAlias :
+        case AliasAndTagsConfigStatusOnlyAlias :
             [dict setValue:alias forKey:@"alias"];
-            [self callBackJsonWithName:@"cbSetAlias" Object:dict];
+            [self callbackJSONWithName:@"cbSetAlias" Object:dict];
             break;
-        case OnlyTags:
+        case AliasAndTagsConfigStatusOnlyTags:
             [dict setValue:[tags allObjects] forKey:@"tags"];
-            [self callBackJsonWithName:@"cbSetTags" Object:dict];
+            [self callbackJSONWithName:@"cbSetTags" Object:dict];
             break;
             
-        default:
+            
+        case AliasAndTagsConfigStatusNeither: {
             break;
+        }
+
     }
-    self.configStatus=Neither;
+    self.configStatus=AliasAndTagsConfigStatusNeither;
 }
 
 
@@ -279,7 +270,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
 
     [dict setValue:[APService registrationID] forKey:@"registrationID"];
-    [self callBackJsonWithName:@"cbGetRegistrationID" Object:dict];
+    [self callbackJSONWithName:@"cbGetRegistrationID" Object:dict];
 
 }
 -(void)getConnectionState{
@@ -291,36 +282,46 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     }
     NSMutableDictionary *dict =[NSMutableDictionary dictionary];
     [dict setValue:state forKey:@"result"];
-    [self callBackJsonWithName:@"cbGetConnectionState" Object:dict];
+    [self callbackJSONWithName:@"cbGetConnectionState" Object:dict];
 }
 #pragma mark LocalNotifications
 
--(void)callBackLocalNotification:(UILocalNotification*)notification{
+-(void)callbackLocalNotification:(UILocalNotification*)notification state:(UIApplicationState)state{
     
     if(!self.disableLocalNotificationAlertView){
            [APService showLocalNotificationAtFront:notification identifierKey:nil];
     }
-    [self callBackJsonWithName:@"onReceiveNotification" Object:[self parseLocalNotification:notification]];
+    switch (state) {
+        case UIApplicationStateActive: {
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotification:notification]];
+            break;
+        }
+        case UIApplicationStateInactive: {
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotification:notification]];
+            break;
+        }
+        case UIApplicationStateBackground: {
+
+            break;
+        }
+
+    }
+    
 
 }
 
 -(NSDictionary *)parseLocalNotification:(UILocalNotification*)notification{
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    NSString *key=[@([notification.fireDate timeIntervalSince1970]) stringValue];
-    JPushLocalNotificationData *data =nil;
-    for (JPushLocalNotificationData *aData in self.localNotifications) {
-        if([aData.ts isEqual:key]){
-            data=aData;
+    __block NSMutableDictionary *dict=[NSMutableDictionary dictionary];
+    __block NSMutableDictionary *extras=[NSMutableDictionary dictionary];
+    NSDictionary *info = notification.userInfo;
+    [info enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if([key isEqual:@"__JPFNotificationKey"]){
+            [dict setValue:@([obj integerValue]) forKey:@"notificationId"];
+        }else{
+            [extras setValue:obj forKey:key];
         }
-    }
-    if(data){
-        [dict setValue:data.title forKey:@"title"];
-        //[dict setValue:data.content forKey:@"content"];
-        [dict setValue:data.extras forKey:@"extras"];
-        [dict setValue:data.identifier forKey:@"notificationId"];
-        [self.localNotifications removeObject:data];
-    }
-
+    }];
+    [dict setValue:extras forKey:@"extras"];
     [dict setValue:notification.alertBody forKey:@"content"];
     [dict setValue:@(NO) forKey:@"isAPNs"];
     return dict;
@@ -332,16 +333,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
                                      content:(NSString *)content
                                       extras:(NSDictionary *)extras
                                        title:(NSString *)title{
-    
-    //NSLog(@"%f",[time timeIntervalSince1970]);
-    
-    NSString *ts =[NSString stringWithFormat:@"%f",[time timeIntervalSince1970]];
-    JPushLocalNotificationData *localNotif=[[JPushLocalNotificationData alloc]initWithTitle:[title copy] content:[content copy] extras:[extras copy] identifier:[ID copy] ts:[ts copy]];
-    if(localNotif){
-        [self.localNotifications addObject:localNotif];
 
-        //NSLog(@"111");
-    }
 
     [APService setLocalNotification:time
                           alertBody:content
@@ -355,21 +347,11 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 
 
 -(void)removeLocalNotification:(NSString*)ID{
-    __block NSMutableArray *notifToBeRemoved=[NSMutableArray array];
-    [self.localNotifications enumerateObjectsUsingBlock:^(JPushLocalNotificationData * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-
-        if([obj.identifier isEqual:ID]){
-            [notifToBeRemoved addObject:obj];
-        }
-    }];
-    for (JPushLocalNotificationData *obj in notifToBeRemoved) {
-        [self.localNotifications removeObject:obj];
-    }
     [APService deleteLocalNotificationWithIdentifierKey:ID];
 }
 
 -(void)clearLocalNotifications{
-    [self.localNotifications removeAllObjects];
+
     [APService clearAllLocalNotifications];
 }
 
@@ -384,12 +366,12 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 }
 
 
-#pragma mark CallBackMethods
+#pragma mark CallbackMethods
 /*
  回调方法name(data)  方法名为name，参数为 字典dict的转成的json字符串
  
  */
--(void) callBackJsonWithName:(NSString *)name Object:(id)obj{
+-(void) callbackJSONWithName:(NSString *)name Object:(id)obj{
     
     static NSString *plgName=@"uexJPush";
     uexPluginCallbackType type = uexPluginCallbackWithJsonString;
@@ -397,39 +379,16 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     
     
 
-    /*
-     
-     
-     
-     if([NSJSONSerialization isValidJSONObject:dict]){
-     NSError *error;
-     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict
-     options:NSJSONWritingPrettyPrinted
-     error:&error
-     ];
-     
-     NSString *result = [[NSString alloc] initWithData:jsonData  encoding:NSUTF8StringEncoding];
-     */
-    /*
-    NSString *result=[dict JSONFragment];
-    NSString *jsSuccessStr = [NSString stringWithFormat:@"if(uexJPush.%@ != null){uexJPush.%@(%@);}",name,name,result];
     
-    [self performSelectorOnMainThread:@selector(callBack:) withObject:jsSuccessStr waitUntilDone:YES];
-    */
 }
 
--(void)callBack:(NSString *)str{
-    //[EUtility evaluatingJavaScriptInRootWnd:str];
-    //[self performSelector:@selector(delayedCallBack:) withObject:str afterDelay:0.01];
-    //[meBrwView stringByEvaluatingJavaScriptFromString:str];
-}
 
 
 
 
 //测试用回调
--(void)occurrenceCallBack:(NSString*)errorMsg{
-    [self callBackJsonWithName:@"onEventOccured" Object:errorMsg];
+-(void)occurrenceCallback:(NSString*)errorMsg{
+    [self callbackJSONWithName:@"onEventOccured" Object:errorMsg];
 }
 
 @end

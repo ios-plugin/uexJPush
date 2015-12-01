@@ -83,7 +83,7 @@
 
 
 + (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification{
-    [[JPushInstance sharedInstance] callBackLocalNotification:notification];
+    [[JPushInstance sharedInstance] callbackLocalNotification:notification state:application.applicationState];
 }
 + (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     
@@ -95,22 +95,22 @@
 
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     
-    [[JPushInstance sharedInstance] callBackRemoteNotification:userInfo];
+    [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
     [APService handleRemoteNotification:userInfo];
 }
 
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+   
     
     
     // IOS 7 Support Required
-    [[JPushInstance sharedInstance] callBackRemoteNotification:userInfo];
+    [[JPushInstance sharedInstance]callbackRemoteNotification:userInfo state:application.applicationState];
     [APService handleRemoteNotification:userInfo];
     completionHandler(UIBackgroundFetchResultNewData);
 }
 
-+ (void)applicationDidBecomeActive:(UIApplication *)application{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
++(void)rootPageDidFinishLoading{
+
 #if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
         if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
             //可以添加自定义categories
@@ -135,8 +135,6 @@
         
         [APService setupWithOption:[JPushInstance sharedInstance].launchOptions];
         [[JPushInstance sharedInstance] wake];
-
-    });
     
 }
 
@@ -164,34 +162,7 @@
 
 
 -(void)init:(NSMutableArray *)inArguments{
- /*
-  
-#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
-        //可以添加自定义categories
-        [APService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
-                                                       UIUserNotificationTypeSound |
-                                                       UIUserNotificationTypeAlert)
-                                           categories:nil];
-    } else {
-        //categories 必须为nil
-        [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
-                                                       UIRemoteNotificationTypeSound |
-                                                       UIRemoteNotificationTypeAlert)
-                                           categories:nil];
-    }
-#else
-    //categories 必须为nil
-    [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
-                                                   UIRemoteNotificationTypeSound |
-                                                   UIRemoteNotificationTypeAlert)
-                                       categories:nil];
-#endif
-    
-    //[APService setupWithOption:opt];
-    [_JPush push];
 
-    */
 }
 
 
@@ -220,7 +191,7 @@
     if([info objectForKey:@"tags"]){
         tags=[info objectForKey:@"tags"];
     }
-    _JPush.configStatus=Both;
+    _JPush.configStatus=AliasAndTagsConfigStatusBoth;
     [_JPush setAlias:alias AndTags:[NSSet setWithArray:tags]];
     
     
@@ -243,7 +214,7 @@
     if([info objectForKey:@"alias"]){
         alias=[info objectForKey:@"alias"];
     }
-    _JPush.configStatus=OnlyAlias;
+    _JPush.configStatus=AliasAndTagsConfigStatusOnlyAlias;
     [_JPush setAlias:alias AndTags:nil];
     
     
@@ -266,7 +237,7 @@
     if([info objectForKey:@"tags"]){
         tags=[info objectForKey:@"tags"];
     }
-    _JPush.configStatus=OnlyTags;
+    _JPush.configStatus=AliasAndTagsConfigStatusOnlyTags;
     [_JPush setAlias:nil AndTags:[NSSet setWithArray:tags]];
     
     

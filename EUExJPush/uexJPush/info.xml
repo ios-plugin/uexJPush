@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="3.0.6" build="6">
-        <info>6:修复root页面回调失效的bug</info>
+        uexName="uexJPush" version="3.0.7" build="7">
+        <info>7:现在应用在后台时，点击推送，会正确的触发onReceiveNotificationOpen</info>
+        <build>6:修复root页面回调失效的bug</build>
         <build>5:新增接口disableLocalNotificationAlertView</build>
         <build>4:新增接口setBadgeNumber</build>
         <build>3:修改推送的extras为字典格式</build>
