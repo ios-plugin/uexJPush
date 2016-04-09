@@ -7,7 +7,7 @@
 //
 
 #import "JPushInstance.h"
-#import "APService.h"
+#import "JPUSHService.h"
 
 
 NSString *const uexJPushOnReceiveNotificationCallbackKey=@"onReceiveNotification";
@@ -210,7 +210,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 }
 -(void)networkDidLogin:(NSNotification *)notification{
     NSMutableDictionary *registrationDict=[NSMutableDictionary dictionary];
-    [registrationDict setValue:[APService registrationID] forKey:@"title"];
+    [registrationDict setValue:[JPUSHService registrationID] forKey:@"title"];
     [self callbackJSONWithName:@"onReceiveRegistration" Object:registrationDict];
     
 }
@@ -256,7 +256,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 
 -(void)setAlias:(NSString *)alias AndTags:(NSSet*)tags{
 
-    [APService setTags:[APService filterValidTags:tags]
+    [JPUSHService setTags:[JPUSHService filterValidTags:tags]
                  alias:alias
       callbackSelector:@selector(tagsAliasCallback:tags:alias:)
                 object:self];
@@ -269,7 +269,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 -(void)getRegistrationID{
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
 
-    [dict setValue:[APService registrationID] forKey:@"registrationID"];
+    [dict setValue:[JPUSHService registrationID] forKey:@"registrationID"];
     [self callbackJSONWithName:@"cbGetRegistrationID" Object:dict];
 
 }
@@ -289,7 +289,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 -(void)callbackLocalNotification:(UILocalNotification*)notification state:(UIApplicationState)state{
     
     if(!self.disableLocalNotificationAlertView){
-           [APService showLocalNotificationAtFront:notification identifierKey:nil];
+           [JPUSHService showLocalNotificationAtFront:notification identifierKey:nil];
     }
     switch (state) {
         case UIApplicationStateActive: {
@@ -335,7 +335,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
                                        title:(NSString *)title{
 
 
-    [APService setLocalNotification:time
+    [JPUSHService setLocalNotification:time
                           alertBody:content
                               badge:-1
                         alertAction:nil
@@ -347,12 +347,12 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 
 
 -(void)removeLocalNotification:(NSString*)ID{
-    [APService deleteLocalNotificationWithIdentifierKey:ID];
+    [JPUSHService deleteLocalNotificationWithIdentifierKey:ID];
 }
 
 -(void)clearLocalNotifications{
 
-    [APService clearAllLocalNotifications];
+    [JPUSHService clearAllLocalNotifications];
 }
 
 #pragma mark badge number
@@ -362,7 +362,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
         return;
     }
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:bNum];
-    [APService setBadge:bNum];
+    [JPUSHService setBadge:bNum];
 }
 
 

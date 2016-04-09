@@ -8,7 +8,7 @@
 
 #import "EUExJPush.h"
 
-#import "APService.h"
+#import "JPUSHService.h"
 #import "JPushInstance.h"
 #import "EUtility.h"
 @interface EUExJPush()
@@ -87,7 +87,7 @@
 }
 + (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     
-    [APService registerDeviceToken:deviceToken];
+    [JPUSHService registerDeviceToken:deviceToken];
     
     
     
@@ -96,7 +96,7 @@
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     
     [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
-    [APService handleRemoteNotification:userInfo];
+    [JPUSHService handleRemoteNotification:userInfo];
 }
 
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
@@ -105,7 +105,7 @@
     
     // IOS 7 Support Required
     [[JPushInstance sharedInstance]callbackRemoteNotification:userInfo state:application.applicationState];
-    [APService handleRemoteNotification:userInfo];
+    [JPUSHService handleRemoteNotification:userInfo];
     completionHandler(UIBackgroundFetchResultNewData);
 }
 
@@ -114,26 +114,26 @@
 #if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
         if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
             //可以添加自定义categories
-            [APService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
+            [JPUSHService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
                                                            UIUserNotificationTypeSound |
                                                            UIUserNotificationTypeAlert)
                                                categories:nil];
         } else {
             //categories 必须为nil
-            [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+            [JPUSHService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
                                                            UIRemoteNotificationTypeSound |
                                                            UIRemoteNotificationTypeAlert)
                                                categories:nil];
         }
 #else
         //categories 必须为nil
-        [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+        [JPUSHService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
                                                        UIRemoteNotificationTypeSound |
                                                        UIRemoteNotificationTypeAlert)
                                            categories:nil];
 #endif
         
-        [APService setupWithOption:[JPushInstance sharedInstance].launchOptions];
+        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions];
         [[JPushInstance sharedInstance] wake];
     
 }
