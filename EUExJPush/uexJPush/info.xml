@@ -2,7 +2,7 @@
 <uexplugins>
     <plugin
         uexName="uexJPush" version="3.0.8" build="8">
-        <info>8:更新JPush SDK到2.1.5</info>
+        <info>8:更新JPush SDK到2.1.6</info>
         <build>7:现在应用在后台时，点击推送，会正确的触发onReceiveNotificationOpen</build>
         <build>6:修复root页面回调失效的bug</build>
         <build>5:新增接口disableLocalNotificationAlertView</build>

@@ -133,8 +133,23 @@
                                            categories:nil];
 #endif
         
-        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions];
-        [[JPushInstance sharedInstance] wake];
+        //[JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions];
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"PushConfig" ofType:@"plist"];
+    NSDictionary *data = [NSDictionary dictionaryWithContentsOfFile:path];
+    
+    NSString *appKey=[data objectForKey:@"APP_KEY"];
+    NSString *channel=[data objectForKey:@"CHANNEL"];
+    NSString *apsForProduction=[data objectForKey:@"APS_FOR_PRODUCTION"];
+    if([apsForProduction isEqual:@"0"]){
+        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:NO];
+    }
+    else{
+        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:YES];
+    }
+    
+    [JPUSHService setLogOFF];
+    [[JPushInstance sharedInstance] wake];
     
 }
 
