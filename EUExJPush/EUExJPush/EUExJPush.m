@@ -24,6 +24,7 @@
 
     if(self){
         _JPush=[JPushInstance sharedInstance];
+        
     }
     return  self;
 }
@@ -85,24 +86,27 @@
 + (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification{
     [[JPushInstance sharedInstance] callbackLocalNotification:notification state:application.applicationState];
 }
+
+BOOL isRootPageFinish = FALSE;
 + (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+//    NSLog(@"------deviceToken111:%@",[NSString stringWithFormat:@"%@",deviceToken]);
     
-    [JPUSHService registerDeviceToken:deviceToken];
-    
-    
-    
+    if (isRootPageFinish == TRUE) {
+         [JPUSHService registerDeviceToken:deviceToken];
+    }
 }
 
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     
     [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
     [JPUSHService handleRemoteNotification:userInfo];
+//    NSLog(@"-----didReceiveRemoteNotification:%@",userInfo);
 }
 
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
    
     
-    
+//      NSLog(@"-----fetchCompletionHandler:%@",userInfo);
     // IOS 7 Support Required
     [[JPushInstance sharedInstance]callbackRemoteNotification:userInfo state:application.applicationState];
     [JPUSHService handleRemoteNotification:userInfo];
@@ -148,11 +152,11 @@
         [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:YES];
     }
     
+    isRootPageFinish = TRUE;
     [JPUSHService setLogOFF];
     [[JPushInstance sharedInstance] wake];
-    
+//    NSLog(@"------setupWithOption:%@",data);
 }
-
 
 
 

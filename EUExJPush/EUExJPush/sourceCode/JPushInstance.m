@@ -71,20 +71,10 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 #pragma mark Notifications
 
-extern NSString * const kJPFNetworkDidSetupNotification;          // 建立连接
-
-extern NSString * const kJPFNetworkDidCloseNotification;          // 关闭连接
-
-extern NSString * const kJPFNetworkDidRegisterNotification;       // 注册成功
-
-extern NSString * const kJPFNetworkDidLoginNotification;          // 登录成功
-
-extern NSString * const kJPFNetworkDidReceiveMessageNotification; // 收到消息(非APNS)
-
-extern NSString *const kJPFServiceErrorNotification;  // 错误提示
 
 
 -(void)activateNotifications{
+//    NSLog(@"------activateNotifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     [defaultCenter addObserver:self
                       selector:@selector(networkDidSetup:)
@@ -184,6 +174,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     [dict setValue:content forKey:@"message"];
     NSDictionary *extras = [userInfo valueForKey:@"extras"];
     [dict setValue:extras forKey:@"extras"];
+//    NSLog(@"-----onReceiveMessage:%@",dict);
     [self callbackJSONWithName:@"onReceiveMessage" Object:dict];
    
 }
@@ -192,6 +183,7 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     self.connectionState=YES;
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     [dict setValue:@"0" forKey:@"connect"];
+//    NSLog(@"-----onReceiveConnectionChange:%@",dict);
     [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
 
@@ -199,22 +191,25 @@ extern NSString *const kJPFServiceErrorNotification;  // 错误提示
     self.connectionState=NO;
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     [dict setValue:@"1" forKey:@"connect"];
-   
+    
+//    NSLog(@"-----onReceiveConnectionChange:%@",dict);
 
     [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
 
 -(void)networkDidRegister:(NSNotification *)notification{
-    
+//    NSLog(@"-----networkDidRegister:%@",notification.userInfo);
    
 }
 -(void)networkDidLogin:(NSNotification *)notification{
     NSMutableDictionary *registrationDict=[NSMutableDictionary dictionary];
     [registrationDict setValue:[JPUSHService registrationID] forKey:@"title"];
+//    NSLog(@"-----onReceiveRegistration:%@",registrationDict);
     [self callbackJSONWithName:@"onReceiveRegistration" Object:registrationDict];
     
 }
 -(void)serviceError:(NSNotification *)notification{
+//    NSLog(@"-----serviceError:%@",notification.userInfo);
     [self occurrenceCallback:[NSString stringWithFormat:@"Service Error : %@",notification.userInfo]];
 }
 
