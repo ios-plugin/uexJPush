@@ -13,11 +13,9 @@
 NSString *const uexJPushOnReceiveNotificationCallbackKey=@"onReceiveNotification";
 NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotificationOpen";
 
-
-
-
-
-
+@interface JPushInstance ()
+@property (nonatomic,strong) ACJSFunctionRef *funct;
+@end
 @implementation JPushInstance
 
 
@@ -221,7 +219,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 #pragma mark - alias and tags
 - (void)tagsAliasCallback:(int)iResCode
                      tags:(NSSet *)tags
-                    alias:(NSString *)alias {
+                    alias:(NSString *)alias{
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     [dict setValue:[NSString stringWithFormat:@"%i",iResCode] forKey:@"result"];
     switch (self.configStatus) {
@@ -249,8 +247,8 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 }
 
 
--(void)setAlias:(NSString *)alias AndTags:(NSSet*)tags{
-
+-(void)setAlias:(NSString *)alias AndTags:(NSSet*)tags Function:(ACJSFunctionRef *)fuc{
+    self.funct = fuc;
     [JPUSHService setTags:[JPUSHService filterValidTags:tags]
                  alias:alias
       callbackSelector:@selector(tagsAliasCallback:tags:alias:)
@@ -261,20 +259,21 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 
 
--(void)getRegistrationID{
+-(void)getRegistrationIDWithfunction:(ACJSFunctionRef *)fuc{
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-
+    self.funct = fuc;
     [dict setValue:[JPUSHService registrationID] forKey:@"registrationID"];
     [self callbackJSONWithName:@"cbGetRegistrationID" Object:dict];
 
 }
--(void)getConnectionState{
+-(void)getConnectionStateWithfunction:(ACJSFunctionRef *)fuc{
     NSString *state=@"";
     if(self.connectionState){
         state=@"0";
     }else{
         state=@"1";
     }
+    self.funct = fuc;
     NSMutableDictionary *dict =[NSMutableDictionary dictionary];
     [dict setValue:state forKey:@"result"];
     [self callbackJSONWithName:@"cbGetConnectionState" Object:dict];
@@ -370,9 +369,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     
     static NSString *plgName=@"uexJPush";
     uexPluginCallbackType type = uexPluginCallbackWithJsonString;
-    [EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
-    
-    
+    //[EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
+    NSString *keyPath = [NSString stringWithFormat:@"%@.%@",plgName,name];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keyPath arguments:ACArgsPack(@(type),obj)];
+    [self.funct executeWithArguments:ACArgsPack(obj)];
+    self.funct = nil;
 
     
 }

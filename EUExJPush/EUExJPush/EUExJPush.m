@@ -19,16 +19,25 @@
 @implementation EUExJPush
 
 
-- (id)initWithBrwView:(EBrowserView *)eInBrwView{
-    self = [super initWithBrwView:eInBrwView];
-
-    if(self){
-        _JPush=[JPushInstance sharedInstance];
+//- (id)initWithBrwView:(EBrowserView *)eInBrwView{
+//    self = [super initWithBrwView:eInBrwView];
+//
+//    if(self){
+//        _JPush=[JPushInstance sharedInstance];
+//        
+//    }
+//    return  self;
+//}
+- (id)initWithWebViewEngine:(id<AppCanWebViewEngineObject>)engine{
+    if (self = [super initWithWebViewEngine:engine]) {
         
+        if(self){
+            _JPush=[JPushInstance sharedInstance];
+            
+        }
     }
-    return  self;
+    return self;
 }
-
 -(void)clean{
 
 
@@ -206,12 +215,13 @@ BOOL isRootPageFinish = FALSE;
     if([info objectForKey:@"alias"]){
         alias=[info objectForKey:@"alias"];
     }
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
     NSArray *tags=nil;
     if([info objectForKey:@"tags"]){
         tags=[info objectForKey:@"tags"];
     }
     _JPush.configStatus=AliasAndTagsConfigStatusBoth;
-    [_JPush setAlias:alias AndTags:[NSSet setWithArray:tags]];
+    [_JPush setAlias:alias AndTags:[NSSet setWithArray:tags] Function:func];
     
     
 }
@@ -229,12 +239,13 @@ BOOL isRootPageFinish = FALSE;
     
     if([inArguments count]<1) return;
     id info =[self getDataFromJson:inArguments[0]];
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
     NSString *alias=nil;
     if([info objectForKey:@"alias"]){
         alias=[info objectForKey:@"alias"];
     }
     _JPush.configStatus=AliasAndTagsConfigStatusOnlyAlias;
-    [_JPush setAlias:alias AndTags:nil];
+    [_JPush setAlias:alias AndTags:nil Function:func];
     
     
 }
@@ -251,13 +262,13 @@ BOOL isRootPageFinish = FALSE;
 -(void)setTags:(NSMutableArray *)inArguments{
     if([inArguments count]<1) return;
     id info =[self getDataFromJson:inArguments[0]];
-
+     ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
     NSArray *tags=nil;
     if([info objectForKey:@"tags"]){
         tags=[info objectForKey:@"tags"];
     }
     _JPush.configStatus=AliasAndTagsConfigStatusOnlyTags;
-    [_JPush setAlias:nil AndTags:[NSSet setWithArray:tags]];
+    [_JPush setAlias:nil AndTags:[NSSet setWithArray:tags] Function:func];
     
     
     
@@ -273,8 +284,8 @@ BOOL isRootPageFinish = FALSE;
 
 
 -(void)getRegistrationID:(NSMutableArray *)inArguments{
-    
-    [_JPush getRegistrationID];
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
+    [_JPush getRegistrationIDWithfunction:func];
     
     
 }
@@ -296,8 +307,8 @@ BOOL isRootPageFinish = FALSE;
 
 
 -(void)getConnectionState:(NSMutableArray *)inArguments{
-    
-    [_JPush getConnectionState];
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
+    [_JPush getConnectionStateWithfunction:func];
     
     
 }

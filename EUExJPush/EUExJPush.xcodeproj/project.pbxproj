@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09C564B01D128FC10034B82D /* AppCanKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09C564AF1D128FC10034B82D /* AppCanKit.framework */; };
 		3C048C741CF7E223006E8D70 /* jpush-ios-2.1.7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C048C721CF7E223006E8D70 /* jpush-ios-2.1.7.a */; };
 		C63A9F201B0987CC00CFD409 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F1F1B0987CC00CFD409 /* CFNetwork.framework */; };
 		C63A9F221B0987D200CFD409 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F211B0987D200CFD409 /* CoreFoundation.framework */; };
@@ -33,10 +34,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		09C564AF1D128FC10034B82D /* AppCanKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppCanKit.framework; sourceTree = "<group>"; };
 		3C048C721CF7E223006E8D70 /* jpush-ios-2.1.7.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "jpush-ios-2.1.7.a"; sourceTree = "<group>"; };
 		3C048C731CF7E223006E8D70 /* JPUSHService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPUSHService.h; sourceTree = "<group>"; };
 		C62DD77D1B0981AB00E7EBD8 /* libuexJPush.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libuexJPush.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		C62DD7A51B0984C700E7EBD8 /* EUExBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUExBase.h; sourceTree = "<group>"; };
 		C62DD7A61B0984C700E7EBD8 /* EUExBaseDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUExBaseDefine.h; sourceTree = "<group>"; };
 		C62DD7A71B0984C700E7EBD8 /* EUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUtility.h; sourceTree = "<group>"; };
 		C62DD7A81B0984C700E7EBD8 /* WidgetOneDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetOneDelegate.h; sourceTree = "<group>"; };
@@ -72,6 +73,7 @@
 				C63A9F2E1B0987FC00CFD409 /* Security.framework in Frameworks */,
 				C63A9F2C1B0987F400CFD409 /* UIKit.framework in Frameworks */,
 				C63A9F2A1B0987ED00CFD409 /* Foundation.framework in Frameworks */,
+				09C564B01D128FC10034B82D /* AppCanKit.framework in Frameworks */,
 				C63A9F281B0987E800CFD409 /* CoreGraphics.framework in Frameworks */,
 				C63A9F261B0987E200CFD409 /* SystemConfiguration.framework in Frameworks */,
 				C63A9F241B0987DA00CFD409 /* CoreTelephony.framework in Frameworks */,
@@ -114,7 +116,6 @@
 		C62DD7A41B0984C700E7EBD8 /* engineHeader */ = {
 			isa = PBXGroup;
 			children = (
-				C62DD7A51B0984C700E7EBD8 /* EUExBase.h */,
 				C62DD7A61B0984C700E7EBD8 /* EUExBaseDefine.h */,
 				C62DD7A71B0984C700E7EBD8 /* EUtility.h */,
 				C62DD7A81B0984C700E7EBD8 /* WidgetOneDelegate.h */,
@@ -137,6 +138,7 @@
 		C62DD7B71B09854600E7EBD8 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				09C564AF1D128FC10034B82D /* AppCanKit.framework */,
 				3C048C721CF7E223006E8D70 /* jpush-ios-2.1.7.a */,
 				3C048C731CF7E223006E8D70 /* JPUSHService.h */,
 			);
@@ -322,6 +324,10 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_IDENTITY = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExJPush/sourceCode/lib",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = $SRCROOT/EUExJPush/sourceCode/PrefixHeader.pch;
 				LIBRARY_SEARCH_PATHS = (
@@ -341,6 +347,10 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_IDENTITY = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExJPush/sourceCode/lib",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = $SRCROOT/EUExJPush/sourceCode/PrefixHeader.pch;
 				LIBRARY_SEARCH_PATHS = (

@@ -9,6 +9,7 @@
 
 #import "EUtility.h"
 #import "JSON.h"
+#import "EUExJPush.h"
 @interface JPushInstance : NSObject
 
 
@@ -35,12 +36,12 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 - (void)inactivateNotifications;
 
 
-- (void)setAlias:(NSString *)alias AndTags:(NSSet *)tags;
+- (void)setAlias:(NSString *)alias AndTags:(NSSet *)tags Function:(ACJSFunctionRef*)fuc;
 
 
 
-- (void)getRegistrationID;
-- (void)getConnectionState;
+- (void)getRegistrationIDWithfunction:(ACJSFunctionRef *)fuc;
+-(void)getConnectionStateWithfunction:(ACJSFunctionRef *)fuc;
 
 
 - (void)addLocalNotificationWithbroadCastTime:(NSDate*)time
