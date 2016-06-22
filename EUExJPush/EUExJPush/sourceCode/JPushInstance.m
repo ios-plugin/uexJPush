@@ -125,11 +125,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 -(void)callbackRemoteNotification:(NSDictionary*)userinfo state:(UIApplicationState)state{
     switch (state) {
         case UIApplicationStateActive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
+            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
             break;
         }
         case UIApplicationStateInactive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
+            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
             break;
         }
         case UIApplicationStateBackground: {
@@ -173,7 +173,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     NSDictionary *extras = [userInfo valueForKey:@"extras"];
     [dict setValue:extras forKey:@"extras"];
 //    NSLog(@"-----onReceiveMessage:%@",dict);
-    [self callbackJSONWithName:@"onReceiveMessage" Object:dict];
+    [self callbackJSONWithoutName:@"onReceiveMessage" Object:dict];
    
 }
 
@@ -182,7 +182,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     [dict setValue:@"0" forKey:@"connect"];
 //    NSLog(@"-----onReceiveConnectionChange:%@",dict);
-    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
+    [self callbackJSONWithoutName:@"onReceiveConnectionChange" Object:dict];
 }
 
 -(void)networkDidClose:(NSNotification *)notification{
@@ -192,7 +192,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     
 //    NSLog(@"-----onReceiveConnectionChange:%@",dict);
 
-    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
+    [self callbackJSONWithoutName:@"onReceiveConnectionChange" Object:dict];
 }
 
 -(void)networkDidRegister:(NSNotification *)notification{
@@ -203,7 +203,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     NSMutableDictionary *registrationDict=[NSMutableDictionary dictionary];
     [registrationDict setValue:[JPUSHService registrationID] forKey:@"title"];
 //    NSLog(@"-----onReceiveRegistration:%@",registrationDict);
-    [self callbackJSONWithName:@"onReceiveRegistration" Object:registrationDict];
+    [self callbackJSONWithoutName:@"onReceiveRegistration" Object:registrationDict];
     
 }
 -(void)serviceError:(NSNotification *)notification{
@@ -287,11 +287,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     }
     switch (state) {
         case UIApplicationStateActive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotification:notification]];
+            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotification:notification]];
             break;
         }
         case UIApplicationStateInactive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotification:notification]];
+            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotification:notification]];
             break;
         }
         case UIApplicationStateBackground: {
@@ -378,13 +378,23 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     
 }
 
-
+-(void) callbackJSONWithoutName:(NSString *)name Object:(id)obj{
+    
+    static NSString *plgName=@"uexJPush";
+    uexPluginCallbackType type = uexPluginCallbackWithJsonString;
+    //[EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
+    NSString *keyPath = [NSString stringWithFormat:@"%@.%@",plgName,name];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keyPath arguments:ACArgsPack(@(type),obj)];
+   
+    
+    
+}
 
 
 
 //测试用回调
 -(void)occurrenceCallback:(NSString*)errorMsg{
-    [self callbackJSONWithName:@"onEventOccured" Object:errorMsg];
+    [self callbackJSONWithoutName:@"onEventOccured" Object:errorMsg];
 }
 
 @end
