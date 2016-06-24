@@ -259,11 +259,12 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 
 
--(void)getRegistrationIDWithfunction:(ACJSFunctionRef *)fuc{
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    self.funct = fuc;
-    [dict setValue:[JPUSHService registrationID] forKey:@"registrationID"];
-    [self callbackJSONWithName:@"cbGetRegistrationID" Object:dict];
+-(NSString*)getRegistrationID{
+   // NSMutableDictionary *dict=[NSMutableDictionary dictionary];
+    //[dict setValue:[JPUSHService registrationID] forKey:@"registrationID"];
+    //[self callbackJSONWithName:@"cbGetRegistrationID" Object:dict];
+    
+    return [JPUSHService registrationID];
 
 }
 -(void)getConnectionStateWithfunction:(ACJSFunctionRef *)fuc{

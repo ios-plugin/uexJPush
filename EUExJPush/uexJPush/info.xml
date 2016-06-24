@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-uexName="uexJPush" version="4.0.0" build="10">
+        uexName="uexJPush" version="4.0.0" build="10">
         <info>10:支持引擎4.0，函数入参</info>
         <build>9:更新JPush SDK到2.1.7 -支持IPv6</build>
         <build>8:更新JPush SDK到2.1.6</build>

@@ -283,10 +283,10 @@ BOOL isRootPageFinish = FALSE;
 
 
 
--(void)getRegistrationID:(NSMutableArray *)inArguments{
-    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
-    [_JPush getRegistrationIDWithfunction:func];
+-(NSString*)getRegistrationID:(NSMutableArray *)inArguments{
     
+     NSString *registrationID = [_JPush getRegistrationID];
+     return registrationID;
     
 }
 

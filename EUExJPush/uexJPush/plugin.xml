@@ -6,7 +6,7 @@
         <method name="setAliasAndTags"></method>
         <method name="setAlias"></method>
         <method name="setTags"></method>
-        <method name="getRegistrationID"></method>
+        <method name="getRegistrationID" sync = "true"></method>
         <method name="getConnectionState"></method>
         <method name="addLocalNotification"></method>
         <method name="removeLocalNotification"></method>

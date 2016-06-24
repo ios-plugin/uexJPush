@@ -40,7 +40,7 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 
 
 
-- (void)getRegistrationIDWithfunction:(ACJSFunctionRef *)fuc;
+- (NSString*)getRegistrationID;
 -(void)getConnectionStateWithfunction:(ACJSFunctionRef *)fuc;
 
 
