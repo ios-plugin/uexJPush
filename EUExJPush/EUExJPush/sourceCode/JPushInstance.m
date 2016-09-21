@@ -14,7 +14,10 @@ NSString *const uexJPushOnReceiveNotificationCallbackKey=@"onReceiveNotification
 NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotificationOpen";
 
 @interface JPushInstance ()
-@property (nonatomic,strong) ACJSFunctionRef *funct;
+@property (nonatomic,strong) ACJSFunctionRef *functBoth;
+@property (nonatomic,strong) ACJSFunctionRef *functTags;
+@property (nonatomic,strong) ACJSFunctionRef *functAlias;
+
 @end
 @implementation JPushInstance
 
@@ -125,11 +128,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 -(void)callbackRemoteNotification:(NSDictionary*)userinfo state:(UIApplicationState)state{
     switch (state) {
         case UIApplicationStateActive: {
-            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
             break;
         }
         case UIApplicationStateInactive: {
-            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
             break;
         }
         case UIApplicationStateBackground: {
@@ -173,7 +176,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     NSDictionary *extras = [userInfo valueForKey:@"extras"];
     [dict setValue:extras forKey:@"extras"];
 //    NSLog(@"-----onReceiveMessage:%@",dict);
-    [self callbackJSONWithoutName:@"onReceiveMessage" Object:dict];
+    [self callbackJSONWithName:@"onReceiveMessage" Object:dict];
    
 }
 
@@ -182,7 +185,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     [dict setValue:@"0" forKey:@"connect"];
 //    NSLog(@"-----onReceiveConnectionChange:%@",dict);
-    [self callbackJSONWithoutName:@"onReceiveConnectionChange" Object:dict];
+    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
 
 -(void)networkDidClose:(NSNotification *)notification{
@@ -192,7 +195,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     
 //    NSLog(@"-----onReceiveConnectionChange:%@",dict);
 
-    [self callbackJSONWithoutName:@"onReceiveConnectionChange" Object:dict];
+    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
 
 -(void)networkDidRegister:(NSNotification *)notification{
@@ -203,7 +206,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     NSMutableDictionary *registrationDict=[NSMutableDictionary dictionary];
     [registrationDict setValue:[JPUSHService registrationID] forKey:@"title"];
 //    NSLog(@"-----onReceiveRegistration:%@",registrationDict);
-    [self callbackJSONWithoutName:@"onReceiveRegistration" Object:registrationDict];
+    [self callbackJSONWithName:@"onReceiveRegistration" Object:registrationDict];
     
 }
 -(void)serviceError:(NSNotification *)notification{
@@ -221,20 +224,33 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
                      tags:(NSSet *)tags
                     alias:(NSString *)alias{
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
     [dict setValue:[NSString stringWithFormat:@"%i",iResCode] forKey:@"result"];
+    NSNumber *error = @(iResCode);;
     switch (self.configStatus) {
         case AliasAndTagsConfigStatusBoth:
             [dict setValue:alias forKey:@"alias"];
             [dict setValue:[tags allObjects] forKey:@"tags"];
             [self callbackJSONWithName:@"cbSetAliasAndTags" Object:dict];
+        
+            [resultDict setValue:alias forKey:@"alias"];
+            [resultDict setValue:[tags allObjects] forKey:@"tags"];
+            [self.functBoth executeWithArguments:ACArgsPack(error,resultDict)];
+        
             break;
         case AliasAndTagsConfigStatusOnlyAlias :
             [dict setValue:alias forKey:@"alias"];
             [self callbackJSONWithName:@"cbSetAlias" Object:dict];
+        
+            [resultDict setValue:alias forKey:@"alias"];
+            [self.functAlias executeWithArguments:ACArgsPack(error,resultDict)];
             break;
         case AliasAndTagsConfigStatusOnlyTags:
             [dict setValue:[tags allObjects] forKey:@"tags"];
             [self callbackJSONWithName:@"cbSetTags" Object:dict];
+        
+           [resultDict setValue:[tags allObjects] forKey:@"tags"];
+           [self.functTags executeWithArguments:ACArgsPack(error,resultDict)];
             break;
             
             
@@ -243,12 +259,21 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
         }
 
     }
+    
     self.configStatus=AliasAndTagsConfigStatusNeither;
 }
 
 
 -(void)setAlias:(NSString *)alias AndTags:(NSSet*)tags Function:(ACJSFunctionRef *)fuc{
-    self.funct = fuc;
+    if (alias && tags == nil) {
+        self.functAlias = fuc;
+    }
+    if (tags && alias == nil) {
+        self.functTags = fuc;
+    }
+    if (tags && alias) {
+        self.functBoth = fuc;
+    }
     [JPUSHService setTags:[JPUSHService filterValidTags:tags]
                  alias:alias
       callbackSelector:@selector(tagsAliasCallback:tags:alias:)
@@ -274,10 +299,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     }else{
         state=@"1";
     }
-    self.funct = fuc;
+    NSNumber *error = @(state.intValue);
     NSMutableDictionary *dict =[NSMutableDictionary dictionary];
     [dict setValue:state forKey:@"result"];
     [self callbackJSONWithName:@"cbGetConnectionState" Object:dict];
+    [fuc executeWithArguments:ACArgsPack(error)];
 }
 #pragma mark LocalNotifications
 
@@ -288,11 +314,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     }
     switch (state) {
         case UIApplicationStateActive: {
-            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotification:notification]];
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotification:notification]];
             break;
         }
         case UIApplicationStateInactive: {
-            [self callbackJSONWithoutName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotification:notification]];
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotification:notification]];
             break;
         }
         case UIApplicationStateBackground: {
@@ -366,20 +392,8 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
  回调方法name(data)  方法名为name，参数为 字典dict的转成的json字符串
  
  */
+
 -(void) callbackJSONWithName:(NSString *)name Object:(id)obj{
-    
-    static NSString *plgName=@"uexJPush";
-    uexPluginCallbackType type = uexPluginCallbackWithJsonString;
-    //[EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
-    NSString *keyPath = [NSString stringWithFormat:@"%@.%@",plgName,name];
-    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keyPath arguments:ACArgsPack(@(type),obj)];
-    [self.funct executeWithArguments:ACArgsPack(obj)];
-    self.funct = nil;
-
-    
-}
-
--(void) callbackJSONWithoutName:(NSString *)name Object:(id)obj{
     
     static NSString *plgName=@"uexJPush";
     uexPluginCallbackType type = uexPluginCallbackWithJsonString;
@@ -395,7 +409,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 //测试用回调
 -(void)occurrenceCallback:(NSString*)errorMsg{
-    [self callbackJSONWithoutName:@"onEventOccured" Object:errorMsg];
+    [self callbackJSONWithName:@"onEventOccured" Object:errorMsg];
 }
 
 @end

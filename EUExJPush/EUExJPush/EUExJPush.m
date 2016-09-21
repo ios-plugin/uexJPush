@@ -210,7 +210,8 @@ BOOL isRootPageFinish = FALSE;
 
 -(void)setAliasAndTags:(NSMutableArray *)inArguments{
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+    //id info =[self getDataFromJson:inArguments[0]];
+    ACArgsUnpack(NSDictionary *info) = inArguments;
     NSString *alias=nil;
     if([info objectForKey:@"alias"]){
         alias=[info objectForKey:@"alias"];
@@ -238,7 +239,7 @@ BOOL isRootPageFinish = FALSE;
 -(void)setAlias:(NSMutableArray *)inArguments{
     
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+     ACArgsUnpack(NSDictionary *info) = inArguments;
     ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
     NSString *alias=nil;
     if([info objectForKey:@"alias"]){
@@ -261,7 +262,7 @@ BOOL isRootPageFinish = FALSE;
 
 -(void)setTags:(NSMutableArray *)inArguments{
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+     ACArgsUnpack(NSDictionary *info) = inArguments;
      ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
     NSArray *tags=nil;
     if([info objectForKey:@"tags"]){
@@ -332,7 +333,7 @@ BOOL isRootPageFinish = FALSE;
 -(void)addLocalNotification:(NSMutableArray *)inArguments{
     
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+     ACArgsUnpack(NSDictionary *info) = inArguments;
     if(![info isKindOfClass:[NSDictionary class]]||![info objectForKey:@"broadCastTime"]){
         return;
     }
@@ -368,7 +369,7 @@ BOOL isRootPageFinish = FALSE;
 -(void)removeLocalNotification:(NSMutableArray *)inArguments{
     
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+    ACArgsUnpack(NSDictionary *info) = inArguments;
     NSString *notificationId=nil;
     if([info objectForKey:@"notificationId"]){
         notificationId=[NSString stringWithFormat:@"%ld",(long)[info objectForKey:@"notificationId"]];

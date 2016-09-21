@@ -54,14 +54,6 @@
 		C63A9F421B099C0600CFD409 /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		C63A9F551B09E27100CFD409 /* JPushInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPushInstance.h; sourceTree = "<group>"; };
 		C63A9F561B09E27100CFD409 /* JPushInstance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JPushInstance.m; sourceTree = "<group>"; };
-		C6E887961B0C4BD20044D42D /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSON.h; sourceTree = "<group>"; };
-		C6E887971B0C4BD20044D42D /* JSONParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONParser.h; sourceTree = "<group>"; };
-		C6E887981B0C4BD20044D42D /* NSObject+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+SBJSON.h"; sourceTree = "<group>"; };
-		C6E887991B0C4BD20044D42D /* NSString+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SBJSON.h"; sourceTree = "<group>"; };
-		C6E8879A1B0C4BD20044D42D /* SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJSON.h; sourceTree = "<group>"; };
-		C6E8879B1B0C4BD20044D42D /* SBJsonBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonBase.h; sourceTree = "<group>"; };
-		C6E8879C1B0C4BD20044D42D /* SBJsonParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonParser.h; sourceTree = "<group>"; };
-		C6E8879D1B0C4BD20044D42D /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonWriter.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,7 +118,6 @@
 		C62DD7AC1B0984C700E7EBD8 /* sourceCode */ = {
 			isa = PBXGroup;
 			children = (
-				C6E887951B0C4BD20044D42D /* JSON */,
 				C63A9F421B099C0600CFD409 /* PrefixHeader.pch */,
 				C62DD7B71B09854600E7EBD8 /* lib */,
 				C63A9F551B09E27100CFD409 /* JPushInstance.h */,
@@ -158,21 +149,6 @@
 				C63A9F1F1B0987CC00CFD409 /* CFNetwork.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		C6E887951B0C4BD20044D42D /* JSON */ = {
-			isa = PBXGroup;
-			children = (
-				C6E887961B0C4BD20044D42D /* JSON.h */,
-				C6E887971B0C4BD20044D42D /* JSONParser.h */,
-				C6E887981B0C4BD20044D42D /* NSObject+SBJSON.h */,
-				C6E887991B0C4BD20044D42D /* NSString+SBJSON.h */,
-				C6E8879A1B0C4BD20044D42D /* SBJSON.h */,
-				C6E8879B1B0C4BD20044D42D /* SBJsonBase.h */,
-				C6E8879C1B0C4BD20044D42D /* SBJsonParser.h */,
-				C6E8879D1B0C4BD20044D42D /* SBJsonWriter.h */,
-			);
-			path = JSON;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

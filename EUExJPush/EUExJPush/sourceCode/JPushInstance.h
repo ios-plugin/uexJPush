@@ -8,7 +8,6 @@
 
 
 #import "EUtility.h"
-#import "JSON.h"
 #import "EUExJPush.h"
 @interface JPushInstance : NSObject
 
@@ -57,7 +56,7 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 - (void)callbackRemoteNotification:(NSDictionary*)userinfo state:(UIApplicationState)state;
 - (void)callbackLocalNotification:(UILocalNotification*)notification state:(UIApplicationState)state;
 - (void)callbackJSONWithName:(NSString *)name Object:(id)dict;
-- (void) callbackJSONWithoutName:(NSString *)name Object:(id)obj;
+//- (void) callbackJSONWithoutName:(NSString *)name Object:(id)obj;
 
 - (void)setBadgeNumber:(NSInteger)bNum;
 
