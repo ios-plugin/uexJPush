@@ -236,6 +236,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
             [resultDict setValue:alias forKey:@"alias"];
             [resultDict setValue:[tags allObjects] forKey:@"tags"];
             [self.functBoth executeWithArguments:ACArgsPack(error,resultDict)];
+            self.functBoth = nil;
         
             break;
         case AliasAndTagsConfigStatusOnlyAlias :
@@ -244,6 +245,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
         
             [resultDict setValue:alias forKey:@"alias"];
             [self.functAlias executeWithArguments:ACArgsPack(error,resultDict)];
+            self.functAlias = nil;
             break;
         case AliasAndTagsConfigStatusOnlyTags:
             [dict setValue:[tags allObjects] forKey:@"tags"];
@@ -251,6 +253,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
         
            [resultDict setValue:[tags allObjects] forKey:@"tags"];
            [self.functTags executeWithArguments:ACArgsPack(error,resultDict)];
+            self.functTags = nil;
             break;
             
             
@@ -397,9 +400,9 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     
     static NSString *plgName=@"uexJPush";
     uexPluginCallbackType type = uexPluginCallbackWithJsonString;
-    //[EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
-    NSString *keyPath = [NSString stringWithFormat:@"%@.%@",plgName,name];
-    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keyPath arguments:ACArgsPack(@(type),obj)];
+    [EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
+     //NSString *keyPath = [NSString stringWithFormat:@"%@.%@",plgName,name];
+    //[AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keyPath arguments:ACArgsPack(@(type),obj)];
    
     
     
