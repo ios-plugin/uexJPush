@@ -27,7 +27,7 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 @property (nonatomic,assign) AliasAndTagsConfigStatus configStatus;
 @property (nonatomic,strong) NSDictionary *launchOptions;
 @property (nonatomic,assign) BOOL disableLocalNotificationAlertView;
-
+@property (nonatomic,assign) id notification;
 
 
 +(instancetype)sharedInstance;
@@ -43,11 +43,12 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 - (void)getConnectionState;
 
 
-- (void)addLocalNotificationWithbroadCastTime:(NSDate*)time
+- (void)addLocalNotificationWithbroadCastTime:(NSDate*)time timeInterval:(NSTimeInterval)timeInterval
                               notificationId:(NSString*)ID
-                                     content:(NSString *)content
+                                     content:(NSString *)body
                                       extras:(NSDictionary *)extras
                                        title:(NSString *)title;
+-(void)callbackLocalNotificationiOS10:(UNNotificationContent*)content state:(UIApplicationState)state;
 - (void)removeLocalNotification:(NSString*)ID;
 - (void)clearLocalNotifications;
 

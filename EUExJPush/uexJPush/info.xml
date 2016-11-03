@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="3.0.9" build="9">
-        <info>9:更新JPush SDK到2.1.7 -支持IPv6</info>
+        uexName="uexJPush" version="3.0.10" build="10">
+        <info>9:更新JPush SDK到2.2.0</info>
+        <build>8:更新JPush SDK到2.1.7 -支持IPv6</build>
         <build>8:更新JPush SDK到2.1.6</build>
         <build>7:现在应用在后台时，点击推送，会正确的触发onReceiveNotificationOpen</build>
         <build>6:修复root页面回调失效的bug</build>

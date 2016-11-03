@@ -7,19 +7,14 @@
 //
 
 #import "JPushInstance.h"
-#import "JPUSHService.h"
+
 
 
 NSString *const uexJPushOnReceiveNotificationCallbackKey=@"onReceiveNotification";
 NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotificationOpen";
 
 
-
-
-
-
 @implementation JPushInstance
-
 
 
 
@@ -56,6 +51,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 {
     
     if (self = [super init]){
+        self.notification = nil;
         self.connectionState =NO;
         self.configStatus=AliasAndTagsConfigStatusNeither;
         [self activateNotifications];
@@ -161,7 +157,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     [dict setValue:[aps objectForKey:@"alert"] forKey:@"content"];
     [dict setValue:@(YES) forKey:@"isAPNs"];
     [dict setValue:extras forKey:@"extras"];
-    return dict;
+    return userinfo;
 
 }
 
@@ -174,7 +170,6 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     [dict setValue:content forKey:@"message"];
     NSDictionary *extras = [userInfo valueForKey:@"extras"];
     [dict setValue:extras forKey:@"extras"];
-//    NSLog(@"-----onReceiveMessage:%@",dict);
     [self callbackJSONWithName:@"onReceiveMessage" Object:dict];
    
 }
@@ -183,7 +178,6 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     self.connectionState=YES;
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     [dict setValue:@"0" forKey:@"connect"];
-//    NSLog(@"-----onReceiveConnectionChange:%@",dict);
     [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
 
@@ -191,8 +185,6 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     self.connectionState=NO;
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     [dict setValue:@"1" forKey:@"connect"];
-    
-//    NSLog(@"-----onReceiveConnectionChange:%@",dict);
 
     [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
 }
@@ -282,7 +274,6 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 #pragma mark LocalNotifications
 
 -(void)callbackLocalNotification:(UILocalNotification*)notification state:(UIApplicationState)state{
-    
     if(!self.disableLocalNotificationAlertView){
            [JPUSHService showLocalNotificationAtFront:notification identifierKey:nil];
     }
@@ -301,10 +292,43 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
         }
 
     }
-    
+    _notification = nil;
 
 }
+-(void)callbackLocalNotificationiOS10:(UNNotificationContent*)content state:(UIApplicationState)state{
+    switch (state) {
+        case UIApplicationStateActive: {
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotificationiOS10:content]];
+            break;
+        }
+        case UIApplicationStateInactive: {
+            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotificationiOS10:content]];
+            break;
+        }
+        case UIApplicationStateBackground: {
+            
+            break;
+        }
+            
+    }
+    _notification = nil;
+}
+-(NSDictionary *)parseLocalNotificationiOS10:(UNNotificationContent*)content{
+    NSNumber *badge = content.badge?:@(0);  // 推送消息的角标
+    NSString *body = content.body?:@"";    // 推送消息体
+    NSString *subtitle = content.subtitle?:@"";  // 推送消息的副标题
+    NSString *title = content.title?:@"";  // 推送消息的标题
 
+    
+    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
+    [dict setValue:badge forKey:@"badge"];
+    [dict setValue:title forKey:@"title"];
+    [dict setValue:subtitle forKey:@"subtitle"];
+    [dict setValue:body forKey:@"content"];
+    [dict setValue:@(NO) forKey:@"isAPNs"];
+    return dict;
+    
+}
 -(NSDictionary *)parseLocalNotification:(UILocalNotification*)notification{
     __block NSMutableDictionary *dict=[NSMutableDictionary dictionary];
     __block NSMutableDictionary *extras=[NSMutableDictionary dictionary];
@@ -323,31 +347,65 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 }
 
 
--(void)addLocalNotificationWithbroadCastTime:(NSDate*)time
-                              notificationId:(NSString*)ID
-                                     content:(NSString *)content
-                                      extras:(NSDictionary *)extras
-                                       title:(NSString *)title{
+- (void)addLocalNotificationWithbroadCastTime:(NSDate*)time timeInterval:(NSTimeInterval)timeInterval
+                               notificationId:(NSString*)ID
+                                      content:(NSString *)body
+                                       extras:(NSDictionary *)extras
+                                        title:(NSString *)title{
 
-
-    [JPUSHService setLocalNotification:time
-                          alertBody:content
-                              badge:-1
-                        alertAction:nil
-                      identifierKey:ID
-                           userInfo:extras
-                          soundName:nil];
+    JPushNotificationContent *content = [[JPushNotificationContent alloc] init];
+    content.title = title;
+    content.userInfo = extras;
+    content.body = body;
+    content.badge = @(-1);
+    JPushNotificationTrigger *trigger = [[JPushNotificationTrigger alloc] init];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
+        trigger.timeInterval = timeInterval; // iOS10以上有效
+    }
+    else {
+        trigger.fireDate = time; // iOS10以下有效
+    }
+    JPushNotificationRequest *request = [[JPushNotificationRequest alloc] init];
+    request.content = content;
+    request.trigger = trigger;
+    request.requestIdentifier = ID;
+    request.completionHandler = ^(id result) {
+        NSLog(@"%@--%@", result,[result class]); // iOS10以上成功则result为UNNotificationRequest对象，失败则result为nil;iOS10以下成功result为UILocalNotification对象，失败则result为nil
+        _notification = result;
+        
+    };
+    [JPUSHService addNotification:request];
 }
 
 
 
 -(void)removeLocalNotification:(NSString*)ID{
-    [JPUSHService deleteLocalNotificationWithIdentifierKey:ID];
+    if (_notification) {
+            JPushNotificationIdentifier *identifier = [[JPushNotificationIdentifier alloc] init];
+        
+            if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0) {
+                //identifier.notificationObj = (UILocalNotification*)_notification;
+            }
+            else {
+#ifdef NSFoundationVersionNumber_iOS_9_x_Max
+                identifier.identifiers = @[ID];
+                identifier.delivered = YES;
+#endif
+            }
+       
+           [JPUSHService removeNotification:identifier];
+            _notification = nil;
+        
+       
+        
+    }
+   
+    
 }
 
 -(void)clearLocalNotifications{
-
-    [JPUSHService clearAllLocalNotifications];
+   
+    [JPUSHService removeNotification:nil];
 }
 
 #pragma mark badge number
