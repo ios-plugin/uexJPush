@@ -16,6 +16,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 @implementation JPushInstance {
     id _notification;
+    NSDictionary *notificationDic;
 }
 
 
@@ -110,7 +111,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     else{
         [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:YES];
     }
-    //[JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:@"68aa042143cb9962a777d0d9" channel:@"Publish channel" apsForProduction:FALSE];
+    
 }
 #ifdef NSFoundationVersionNumber_iOS_9_x_Max
 #pragma mark- JPUSHRegisterDelegate
@@ -478,6 +479,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     request.completionHandler = ^(id result) {
         NSLog(@"%@--%@", result,[result class]); // iOS10以上成功则result为UNNotificationRequest对象，失败则result为nil;iOS10以下成功result为UILocalNotification对象，失败则result为nil
         _notification = result;
+        notificationDic = @{ID:_notification};
         
     };
     [JPUSHService addNotification:request];
@@ -489,16 +491,15 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     if (_notification) {
         NSLog(@"notification:%@====",_notification);
             JPushNotificationIdentifier *identifier = [[JPushNotificationIdentifier alloc] init];
-        
             if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0) {
-                identifier.notificationObj = (UILocalNotification*)_notification;
+                identifier.notificationObj = (UILocalNotification*)notificationDic[ID];
             }
             else {
 #ifdef NSFoundationVersionNumber_iOS_9_x_Max
-                UNNotificationRequest *request = _notification;
-                identifier.identifiers = @[ID];
+                UNNotificationRequest *request = (UNNotificationRequest *)notificationDic[ID];
+                identifier.identifiers = @[request.identifier];
                 identifier.delivered = YES;
-                 NSLog(@"identifier.identifiers:%@==%@",request.identifier,ID);
+                NSLog(@"identifier.identifiers:%@==%@",request.identifier,ID);
 #endif
             }
        
