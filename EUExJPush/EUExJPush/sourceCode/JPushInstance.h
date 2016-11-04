@@ -9,7 +9,7 @@
 
 #import "EUtility.h"
 #import "JSON.h"
-@interface JPushInstance : NSObject
+@interface JPushInstance : NSObject<JPUSHRegisterDelegate>
 
 
 typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
@@ -27,7 +27,7 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 @property (nonatomic,assign) AliasAndTagsConfigStatus configStatus;
 @property (nonatomic,strong) NSDictionary *launchOptions;
 @property (nonatomic,assign) BOOL disableLocalNotificationAlertView;
-@property (nonatomic,assign) id notification;
+
 
 
 +(instancetype)sharedInstance;
@@ -41,14 +41,13 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 
 - (void)getRegistrationID;
 - (void)getConnectionState;
-
+- (void)registerForRemoteNotification;
 
 - (void)addLocalNotificationWithbroadCastTime:(NSDate*)time timeInterval:(NSTimeInterval)timeInterval
                               notificationId:(NSString*)ID
                                      content:(NSString *)body
                                       extras:(NSDictionary *)extras
                                        title:(NSString *)title;
--(void)callbackLocalNotificationiOS10:(UNNotificationContent*)content state:(UIApplicationState)state;
 - (void)removeLocalNotification:(NSString*)ID;
 - (void)clearLocalNotifications;
 

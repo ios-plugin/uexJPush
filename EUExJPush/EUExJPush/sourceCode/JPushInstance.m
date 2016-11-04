@@ -14,7 +14,10 @@ NSString *const uexJPushOnReceiveNotificationCallbackKey=@"onReceiveNotification
 NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotificationOpen";
 
 
-@implementation JPushInstance
+@implementation JPushInstance {
+    id _notification;
+}
+
 
 
 
@@ -51,7 +54,6 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 {
     
     if (self = [super init]){
-        self.notification = nil;
         self.connectionState =NO;
         self.configStatus=AliasAndTagsConfigStatusNeither;
         [self activateNotifications];
@@ -63,7 +65,112 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     return self;
 
 }
-
+-(void)registerForRemoteNotification{
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 10.0) {
+#ifdef NSFoundationVersionNumber_iOS_9_x_Max
+        JPUSHRegisterEntity * entity = [[JPUSHRegisterEntity alloc] init];
+        entity.types = UNAuthorizationOptionAlert|UNAuthorizationOptionBadge|UNAuthorizationOptionSound;
+        [JPUSHService registerForRemoteNotificationConfig:entity delegate:self];
+       
+#endif
+    } else if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
+        //可以添加自定义categories
+        [JPUSHService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
+                                                          UIUserNotificationTypeSound |
+                                                          UIUserNotificationTypeAlert)
+                                              categories:nil];
+    } else {
+        //categories 必须为nil
+        [JPUSHService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                          UIRemoteNotificationTypeSound |
+                                                          UIRemoteNotificationTypeAlert)
+                                              categories:nil];
+    }
+    
+    //2.1.9版本新增获取registration id block接口。
+    [JPUSHService registrationIDCompletionHandler:^(int resCode, NSString *registrationID) {
+        if(resCode == 0){
+            NSLog(@"registrationID获取成功：%@",registrationID);
+        }
+        else{
+            NSLog(@"registrationID获取失败，code：%d",resCode);
+        }
+    }];
+    
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"PushConfig" ofType:@"plist"];
+    NSDictionary *data = [NSDictionary dictionaryWithContentsOfFile:path];
+    
+    NSString *appKey=[data objectForKey:@"APP_KEY"];
+    NSString *channel=[data objectForKey:@"CHANNEL"];
+    NSString *apsForProduction=[data objectForKey:@"APS_FOR_PRODUCTION"];
+    if([apsForProduction isEqual:@"0"]){
+        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:NO];
+    }
+    else{
+        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:YES];
+    }
+    //[JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:@"68aa042143cb9962a777d0d9" channel:@"Publish channel" apsForProduction:FALSE];
+}
+#ifdef NSFoundationVersionNumber_iOS_9_x_Max
+#pragma mark- JPUSHRegisterDelegate
+//App处于前台接收通知时
+- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(NSInteger))completionHandler {
+    NSDictionary * userInfo = notification.request.content.userInfo;
+    
+    UNNotificationRequest *request = notification.request; // 收到推送的请求
+    UNNotificationContent *content = request.content; // 收到推送的消息内容
+    
+    NSNumber *badge = content.badge;  // 推送消息的角标
+    NSString *body = content.body;    // 推送消息体
+    UNNotificationSound *sound = content.sound;  // 推送消息的声音
+    NSString *subtitle = content.subtitle;  // 推送消息的副标题
+    NSString *title = content.title;  // 推送消息的标题
+    
+    if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:UIApplicationStateActive];
+        [JPUSHService handleRemoteNotification:userInfo];
+        NSLog(@"iOS10 前台收到远程通知:%@", userInfo);
+        
+        
+        
+    }
+    else {
+        // 判断为本地通知
+        [[JPushInstance sharedInstance] callbackLocalNotificationiOS10:content state:UIApplicationStateActive];
+        NSLog(@"iOS10 前台收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
+    }
+    completionHandler(UNNotificationPresentationOptionBadge|UNNotificationPresentationOptionSound|UNNotificationPresentationOptionAlert); // 需要执行这个方法，选择是否提醒用户，有Badge、Sound、Alert三种类型可以设置
+}
+////App通知的点击事件
+- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)())completionHandler {
+    
+    NSDictionary * userInfo = response.notification.request.content.userInfo;
+    UNNotificationRequest *request = response.notification.request; // 收到推送的请求
+    UNNotificationContent *content = request.content; // 收到推送的消息内容
+    
+    NSNumber *badge = content.badge;  // 推送消息的角标
+    NSString *body = content.body;    // 推送消息体
+    UNNotificationSound *sound = content.sound;  // 推送消息的声音
+    NSString *subtitle = content.subtitle;  // 推送消息的副标题
+    NSString *title = content.title;  // 推送消息的标题
+    
+    if([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:UIApplicationStateInactive];
+        [JPUSHService handleRemoteNotification:userInfo];
+        NSLog(@"iOS10 收到远程通知:%@", userInfo);
+        
+        
+    }
+    else {
+        // 判断为本地通知
+        [[JPushInstance sharedInstance] callbackLocalNotificationiOS10:content state:UIApplicationStateInactive];
+        NSLog(@"iOS10 收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
+    }
+    
+    completionHandler();  // 系统要求执行这个方法
+}
+#endif
 
 #pragma mark Notifications
 
@@ -346,7 +453,6 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     return dict;
 }
 
-
 - (void)addLocalNotificationWithbroadCastTime:(NSDate*)time timeInterval:(NSTimeInterval)timeInterval
                                notificationId:(NSString*)ID
                                       content:(NSString *)body
@@ -381,15 +487,18 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 -(void)removeLocalNotification:(NSString*)ID{
     if (_notification) {
+        NSLog(@"notification:%@====",_notification);
             JPushNotificationIdentifier *identifier = [[JPushNotificationIdentifier alloc] init];
         
             if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0) {
-                //identifier.notificationObj = (UILocalNotification*)_notification;
+                identifier.notificationObj = (UILocalNotification*)_notification;
             }
             else {
 #ifdef NSFoundationVersionNumber_iOS_9_x_Max
+                UNNotificationRequest *request = _notification;
                 identifier.identifiers = @[ID];
                 identifier.delivered = YES;
+                 NSLog(@"identifier.identifiers:%@==%@",request.identifier,ID);
 #endif
             }
        
