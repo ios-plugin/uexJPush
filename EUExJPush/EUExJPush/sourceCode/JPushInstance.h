@@ -8,8 +8,8 @@
 
 
 #import "EUtility.h"
-#import "EUExJPush.h"
-@interface JPushInstance : NSObject
+#import "JSON.h"
+@interface JPushInstance : NSObject<JPUSHRegisterDelegate>
 
 
 typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
@@ -41,11 +41,11 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 
 - (NSString*)getRegistrationID;
 -(void)getConnectionStateWithfunction:(ACJSFunctionRef *)fuc;
+- (void)registerForRemoteNotification;
 
-
-- (void)addLocalNotificationWithbroadCastTime:(NSDate*)time
+- (void)addLocalNotificationWithbroadCastTime:(NSDate*)time timeInterval:(NSTimeInterval)timeInterval
                               notificationId:(NSString*)ID
-                                     content:(NSString *)content
+                                     content:(NSString *)body
                                       extras:(NSDictionary *)extras
                                        title:(NSString *)title;
 - (void)removeLocalNotification:(NSString*)ID;
@@ -56,7 +56,7 @@ typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
 - (void)callbackRemoteNotification:(NSDictionary*)userinfo state:(UIApplicationState)state;
 - (void)callbackLocalNotification:(UILocalNotification*)notification state:(UIApplicationState)state;
 - (void)callbackJSONWithName:(NSString *)name Object:(id)dict;
-//- (void) callbackJSONWithoutName:(NSString *)name Object:(id)obj;
+
 
 - (void)setBadgeNumber:(NSInteger)bNum;
 

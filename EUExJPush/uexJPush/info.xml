@@ -2,6 +2,6 @@
 <uexplugins>
     <plugin
         uexName="uexJPush" version="4.0.0" build="0">
-        <info>0:支持引擎4.0，函数入参</info>
+        <info>0:插件4.0，更新JPush SDK到2.2.0</info>
     </plugin>
 </uexplugins>
