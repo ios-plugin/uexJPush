@@ -498,7 +498,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 #ifdef NSFoundationVersionNumber_iOS_9_x_Max
                 UNNotificationRequest *request = (UNNotificationRequest *)notificationDic[ID];
                 identifier.identifiers = @[request.identifier];
-                identifier.delivered = YES;
+                identifier.delivered = NO;
                 NSLog(@"identifier.identifiers:%@==%@",request.identifier,ID);
 #endif
             }
