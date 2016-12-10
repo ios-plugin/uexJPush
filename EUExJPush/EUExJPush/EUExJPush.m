@@ -7,176 +7,95 @@
 //
 
 #import "EUExJPush.h"
-
-#import "JPUSHService.h"
 #import "JPushInstance.h"
+#import "JSON.h"
 #import "EUtility.h"
 @interface EUExJPush()
 @property (nonatomic,strong) JPushInstance *JPush;
-
 @end
-
 @implementation EUExJPush
-
-
-- (id)initWithBrwView:(EBrowserView *)eInBrwView{
-    self = [super initWithBrwView:eInBrwView];
-
-    if(self){
-        _JPush=[JPushInstance sharedInstance];
+- (id)initWithWebViewEngine:(id<AppCanWebViewEngineObject>)engine{
+    if (self = [super initWithWebViewEngine:engine]) {
         
+        if(self){
+            _JPush=[JPushInstance sharedInstance];
+            
+        }
     }
-    return  self;
+    return self;
 }
-
--(void)clean{
-
-
-}
-
--(void)dealloc{
-    [self clean];
-    [super dealloc];
-}
-
-//从json字符串中获取数据
 - (id)getDataFromJson:(NSString *)jsonData{
     NSError *error = nil;
-    
-    
-    
+
+
+
     NSData *jsonData2= [jsonData dataUsingEncoding:NSUTF8StringEncoding];
-    
+
     id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData2
-                     
+
                                                     options:NSJSONReadingMutableContainers
-                     
+
                                                       error:&error];
-    
+
     if (jsonObject != nil && error == nil){
-        
+
         return jsonObject;
     }else{
-        
+
         // 解析錯誤
-        
+
         return nil;
     }
-    
+
 }
-#pragma mark applicationDelegate
-
 +(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
-
     [[JPushInstance sharedInstance] setLaunchOptions:launchOptions];
-
-
-    
-
-    
-    
-    
-    
-    
-    
     return YES;
 }
-
-
-+ (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification{
-    [[JPushInstance sharedInstance] callbackLocalNotification:notification state:application.applicationState];
+BOOL isRootPageFinish = FALSE;
++(void)rootPageDidFinishLoading{
+    [[JPushInstance sharedInstance] registerForRemoteNotification];
+    isRootPageFinish = TRUE;
+    //[JPUSHService setLogOFF];
+    [[JPushInstance sharedInstance] wake];
+   
 }
 
-BOOL isRootPageFinish = FALSE;
-+ (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-//    NSLog(@"------deviceToken111:%@",[NSString stringWithFormat:@"%@",deviceToken]);
-    
+
+
++ (void)application:(UIApplication *)application
+didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    NSLog(@"%@", [NSString stringWithFormat:@"Device Token: %@", deviceToken]);
     if (isRootPageFinish == TRUE) {
-         [JPUSHService registerDeviceToken:deviceToken];
+        [JPUSHService registerDeviceToken:deviceToken];
+        
     }
 }
 
-+(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    
++(void)application:(UIApplication *)application
+didReceiveRemoteNotification:(NSDictionary *)userInfo {
     [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
     [JPUSHService handleRemoteNotification:userInfo];
-//    NSLog(@"-----didReceiveRemoteNotification:%@",userInfo);
+    NSLog(@"iOS6及以下系统，收到通知:%@",userInfo);
+   
 }
 
-+(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
-   
-    
-//      NSLog(@"-----fetchCompletionHandler:%@",userInfo);
-    // IOS 7 Support Required
-    [[JPushInstance sharedInstance]callbackRemoteNotification:userInfo state:application.applicationState];
++ (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler: (void (^)(UIBackgroundFetchResult))completionHandler {
+      [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
     [JPUSHService handleRemoteNotification:userInfo];
+    NSLog(@"iOS7及以上系统，收到通知:%@", userInfo);
+    
+    if ([[UIDevice currentDevice].systemVersion floatValue]<10.0 || application.applicationState>0) {
+       
+    }
+    
     completionHandler(UIBackgroundFetchResultNewData);
 }
 
-+(void)rootPageDidFinishLoading{
++ (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
+    [[JPushInstance sharedInstance] callbackLocalNotification:notification state:application.applicationState];
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
-        if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
-            //可以添加自定义categories
-            [JPUSHService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
-                                                           UIUserNotificationTypeSound |
-                                                           UIUserNotificationTypeAlert)
-                                               categories:nil];
-        } else {
-            //categories 必须为nil
-            [JPUSHService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
-                                                           UIRemoteNotificationTypeSound |
-                                                           UIRemoteNotificationTypeAlert)
-                                               categories:nil];
-        }
-#else
-        //categories 必须为nil
-        [JPUSHService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
-                                                       UIRemoteNotificationTypeSound |
-                                                       UIRemoteNotificationTypeAlert)
-                                           categories:nil];
-#endif
-        
-        //[JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions];
-    
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"PushConfig" ofType:@"plist"];
-    NSDictionary *data = [NSDictionary dictionaryWithContentsOfFile:path];
-    
-    NSString *appKey=[data objectForKey:@"APP_KEY"];
-    NSString *channel=[data objectForKey:@"CHANNEL"];
-    NSString *apsForProduction=[data objectForKey:@"APS_FOR_PRODUCTION"];
-    if([apsForProduction isEqual:@"0"]){
-        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:NO];
-    }
-    else{
-        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:YES];
-    }
-    
-    isRootPageFinish = TRUE;
-    [JPUSHService setLogOFF];
-    [[JPushInstance sharedInstance] wake];
-//    NSLog(@"------setupWithOption:%@",data);
 }
-
-
-
-
-
-
-
-
-#pragma mark uexJPush APIs
-
-
-
-
-
-/*
- ###init
- params:
- debug
- 
- */
 
 
 
@@ -201,7 +120,8 @@ BOOL isRootPageFinish = FALSE;
 
 -(void)setAliasAndTags:(NSMutableArray *)inArguments{
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+    ACArgsUnpack(NSDictionary *info) = inArguments;
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
     NSString *alias=nil;
     if([info objectForKey:@"alias"]){
         alias=[info objectForKey:@"alias"];
@@ -211,7 +131,7 @@ BOOL isRootPageFinish = FALSE;
         tags=[info objectForKey:@"tags"];
     }
     _JPush.configStatus=AliasAndTagsConfigStatusBoth;
-    [_JPush setAlias:alias AndTags:[NSSet setWithArray:tags]];
+    [_JPush setAlias:alias AndTags:[NSSet setWithArray:tags] Function:func];
     
     
 }
@@ -228,13 +148,14 @@ BOOL isRootPageFinish = FALSE;
 -(void)setAlias:(NSMutableArray *)inArguments{
     
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+    ACArgsUnpack(NSDictionary *info) = inArguments;
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
     NSString *alias=nil;
     if([info objectForKey:@"alias"]){
         alias=[info objectForKey:@"alias"];
     }
     _JPush.configStatus=AliasAndTagsConfigStatusOnlyAlias;
-    [_JPush setAlias:alias AndTags:nil];
+     [_JPush setAlias:alias AndTags:nil Function:func];
     
     
 }
@@ -250,14 +171,15 @@ BOOL isRootPageFinish = FALSE;
 
 -(void)setTags:(NSMutableArray *)inArguments{
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+    ACArgsUnpack(NSDictionary *info) = inArguments;
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
 
     NSArray *tags=nil;
     if([info objectForKey:@"tags"]){
         tags=[info objectForKey:@"tags"];
     }
     _JPush.configStatus=AliasAndTagsConfigStatusOnlyTags;
-    [_JPush setAlias:nil AndTags:[NSSet setWithArray:tags]];
+     [_JPush setAlias:nil AndTags:[NSSet setWithArray:tags] Function:func];
     
     
     
@@ -272,10 +194,10 @@ BOOL isRootPageFinish = FALSE;
 
 
 
--(void)getRegistrationID:(NSMutableArray *)inArguments{
+-(NSString*)getRegistrationID:(NSMutableArray *)inArguments{
     
-    [_JPush getRegistrationID];
-    
+    NSString *registrationID = [_JPush getRegistrationID];
+    return registrationID;
     
 }
 
@@ -297,7 +219,8 @@ BOOL isRootPageFinish = FALSE;
 
 -(void)getConnectionState:(NSMutableArray *)inArguments{
     
-    [_JPush getConnectionState];
+    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
+    [_JPush getConnectionStateWithfunction:func];
     
     
 }
@@ -321,7 +244,7 @@ BOOL isRootPageFinish = FALSE;
 -(void)addLocalNotification:(NSMutableArray *)inArguments{
     
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+    ACArgsUnpack(NSDictionary *info) = inArguments;
     if(![info isKindOfClass:[NSDictionary class]]||![info objectForKey:@"broadCastTime"]){
         return;
     }
@@ -335,7 +258,7 @@ BOOL isRootPageFinish = FALSE;
     }
     NSString *broadCastTime=[info objectForKey:@"broadCastTime"]?:@"0";
     
-    [_JPush addLocalNotificationWithbroadCastTime:[NSDate dateWithTimeIntervalSinceNow:([broadCastTime doubleValue]/1000)]
+    [_JPush addLocalNotificationWithbroadCastTime:[NSDate dateWithTimeIntervalSinceNow:([broadCastTime doubleValue]/1000)] timeInterval:([broadCastTime doubleValue]/1000)
                                    notificationId:nid?:@"-1"
                                           content:[info objectForKey:@"content"]?:@""
                                            extras:[info objectForKey:@"extras"]?:nil
@@ -357,10 +280,11 @@ BOOL isRootPageFinish = FALSE;
 -(void)removeLocalNotification:(NSMutableArray *)inArguments{
     
     if([inArguments count]<1) return;
-    id info =[self getDataFromJson:inArguments[0]];
+    ACArgsUnpack(NSDictionary *info) = inArguments;
     NSString *notificationId=nil;
     if([info objectForKey:@"notificationId"]){
-        notificationId=[NSString stringWithFormat:@"%ld",(long)[info objectForKey:@"notificationId"]];
+        notificationId=[NSString stringWithFormat:@"%@",[info objectForKey:@"notificationId"]];
+        NSLog(@"removeLocalNotification:%@===%@",inArguments[0],notificationId);
     }
     [_JPush removeLocalNotification:notificationId];
     
@@ -402,5 +326,4 @@ BOOL isRootPageFinish = FALSE;
         [JPushInstance sharedInstance].disableLocalNotificationAlertView=NO;
     }
 }
-
 @end

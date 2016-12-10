@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="3.0.9" build="9">
-        <info>9:更新JPush SDK到2.1.7 -支持IPv6</info>
-        <build>8:更新JPush SDK到2.1.6</build>
-        <build>7:现在应用在后台时，点击推送，会正确的触发onReceiveNotificationOpen</build>
-        <build>6:修复root页面回调失效的bug</build>
-        <build>5:新增接口disableLocalNotificationAlertView</build>
-        <build>4:新增接口setBadgeNumber</build>
-        <build>3:修改推送的extras为字典格式</build>
-        <build>2:添加对config.xml配置的支持</build>
-        <build>1:插件会自动初始化；插件支持onReceiveNotificationOpen监听</build>
-        <build>0:极光推送(uexJPush) 插件 for iOS</build>
-
-
+        uexName="uexJPush" version="4.0.0" build="0">
+        <info>0:插件4.0，更新JPush SDK到2.2.0</info>
     </plugin>
 </uexplugins>
