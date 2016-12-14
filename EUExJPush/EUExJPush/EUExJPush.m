@@ -8,8 +8,7 @@
 
 #import "EUExJPush.h"
 #import "JPushInstance.h"
-#import "JSON.h"
-#import "EUtility.h"
+
 @interface EUExJPush()
 @property (nonatomic,strong) JPushInstance *JPush;
 @end
@@ -52,42 +51,37 @@
     [[JPushInstance sharedInstance] setLaunchOptions:launchOptions];
     return YES;
 }
-BOOL isRootPageFinish = FALSE;
+static BOOL isRootPageFinish = NO;
 +(void)rootPageDidFinishLoading{
     [[JPushInstance sharedInstance] registerForRemoteNotification];
-    isRootPageFinish = TRUE;
-    //[JPUSHService setLogOFF];
+    isRootPageFinish = YES;
+    if (!(ACLogGlobalLogMode & ACLogLevelDebug)) {
+        [JPUSHService setLogOFF];
+    }
     [[JPushInstance sharedInstance] wake];
    
 }
 
 
 
-+ (void)application:(UIApplication *)application
-didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    NSLog(@"%@", [NSString stringWithFormat:@"Device Token: %@", deviceToken]);
++ (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     if (isRootPageFinish == TRUE) {
         [JPUSHService registerDeviceToken:deviceToken];
         
     }
 }
 
-+(void)application:(UIApplication *)application
-didReceiveRemoteNotification:(NSDictionary *)userInfo {
++(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
     [JPUSHService handleRemoteNotification:userInfo];
-    NSLog(@"iOS6及以下系统，收到通知:%@",userInfo);
    
 }
 
 + (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler: (void (^)(UIBackgroundFetchResult))completionHandler {
-      [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
+    [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
     [JPUSHService handleRemoteNotification:userInfo];
-    NSLog(@"iOS7及以上系统，收到通知:%@", userInfo);
-    
-    if ([[UIDevice currentDevice].systemVersion floatValue]<10.0 || application.applicationState>0) {
-       
-    }
+
+
     
     completionHandler(UIBackgroundFetchResultNewData);
 }
@@ -106,15 +100,6 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
 
 
 
-
-
-/*
- ###setAliasAndTags
- params:
- alias
- tags
- 
- */
 
 
 
@@ -220,88 +205,40 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
 -(void)getConnectionState:(NSMutableArray *)inArguments{
     
     ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
-    [_JPush getConnectionStateWithfunction:func];
+    [_JPush getConnectionStateWithCallbackFunction:func];
     
     
 }
-
-
-
-/*
- ###addLocalNotification
- params:
- builderId
- title
- content
- extras
- notificationId
- broadCastTime
- 
- */
 
 
 
 -(void)addLocalNotification:(NSMutableArray *)inArguments{
     
-    if([inArguments count]<1) return;
+
     ACArgsUnpack(NSDictionary *info) = inArguments;
-    if(![info isKindOfClass:[NSDictionary class]]||![info objectForKey:@"broadCastTime"]){
-        return;
-    }
-    NSDictionary *extras=nil;
-    if([info objectForKey:@"extras"]){
-        extras=[info objectForKey:@"extras"];
-    }
-    id nid=[info objectForKey:@"notificationId"];
-    if([nid isKindOfClass:[NSNumber class]]){
-        nid=[nid stringValue];
-    }
-    NSString *broadCastTime=[info objectForKey:@"broadCastTime"]?:@"0";
+    UEX_PARAM_GUARD_NOT_NIL(info);
     
-    [_JPush addLocalNotificationWithbroadCastTime:[NSDate dateWithTimeIntervalSinceNow:([broadCastTime doubleValue]/1000)] timeInterval:([broadCastTime doubleValue]/1000)
-                                   notificationId:nid?:@"-1"
-                                          content:[info objectForKey:@"content"]?:@""
-                                           extras:[info objectForKey:@"extras"]?:nil
-                                            title:[info objectForKey:@"title"]?:@""];
+    [_JPush addLocalNotificationWithTimeInterval: numberArg(info[@"broadCastTime"]).doubleValue/1000
+                                   notificationId:stringArg(info[@"notificationId"]) ?: @"-1"
+                                          content:stringArg(info[@"content"]) ?: @""
+                                           extras:dictionaryArg(info[@"extras"])
+                                            title:stringArg(info[@"title"]) ?: @""];
+
     
 }
 
-
-
-/*
- ###removeLocalNotification
- params:
- notificationId
- 
- */
 
 
 
 -(void)removeLocalNotification:(NSMutableArray *)inArguments{
-    
-    if([inArguments count]<1) return;
     ACArgsUnpack(NSDictionary *info) = inArguments;
-    NSString *notificationId=nil;
-    if([info objectForKey:@"notificationId"]){
-        notificationId=[NSString stringWithFormat:@"%@",[info objectForKey:@"notificationId"]];
-        NSLog(@"removeLocalNotification:%@===%@",inArguments[0],notificationId);
-    }
+    NSString *notificationId = stringArg(info[@"notificationId"]);
     [_JPush removeLocalNotification:notificationId];
-    
-    
 }
 
 
 
-/*
- ###clearLocalNotifications
- 
- */
-
-
-
 -(void)clearLocalNotifications:(NSMutableArray *)inArguments{
-    
     [_JPush clearLocalNotifications];
     
     
@@ -309,21 +246,15 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
 
 
 -(void)setBadgeNumber:(NSMutableArray *)inArguments{
-    NSInteger num=0;
-    if([inArguments count]>0){
-        num=[inArguments[0] integerValue];
-    }
-    [_JPush setBadgeNumber:num];
+    ACArgsUnpack(NSNumber *number) = inArguments;
+    [_JPush setBadgeNumber:number.integerValue];
 }
 
 -(void)disableLocalNotificationAlertView:(NSMutableArray *)inArguments{
-    if([inArguments count]==0){
-        return;
-    }
-    if([inArguments[0] integerValue]==1){
-        [JPushInstance sharedInstance].disableLocalNotificationAlertView=YES;
-    }else{
-        [JPushInstance sharedInstance].disableLocalNotificationAlertView=NO;
-    }
+    ACArgsUnpack(NSNumber *flag) = inArguments;
+    UEX_PARAM_GUARD_NOT_NIL(flag);
+    [JPushInstance sharedInstance].disableLocalNotificationAlertView = flag.boolValue;
+
+    
 }
 @end

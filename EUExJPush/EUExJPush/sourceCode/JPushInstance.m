@@ -96,10 +96,10 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     //2.1.9版本新增获取registration id block接口。
     [JPUSHService registrationIDCompletionHandler:^(int resCode, NSString *registrationID) {
         if(resCode == 0){
-            NSLog(@"registrationID获取成功：%@",registrationID);
+            ACLogDebug(@"JPUSH registrationID获取成功：%@",registrationID);
         }
         else{
-            NSLog(@"registrationID获取失败，code：%d",resCode);
+            ACLogDebug(@"JPUSH registrationID获取失败，code：%d",resCode);
         }
     }];
     
@@ -107,15 +107,12 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     NSString *path = [[NSBundle mainBundle] pathForResource:@"PushConfig" ofType:@"plist"];
     NSDictionary *data = [NSDictionary dictionaryWithContentsOfFile:path];
     
-    NSString *appKey=[data objectForKey:@"APP_KEY"];
-    NSString *channel=[data objectForKey:@"CHANNEL"];
-    NSString *apsForProduction=[data objectForKey:@"APS_FOR_PRODUCTION"];
-    if([apsForProduction isEqual:@"0"]){
-        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:NO];
-    }
-    else{
-        [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:YES];
-    }
+    NSString *appKey = [data objectForKey:@"APP_KEY"];
+    NSString *channel = [data objectForKey:@"CHANNEL"];
+    NSString *apsForProduction = [data objectForKey:@"APS_FOR_PRODUCTION"];
+    BOOL isProduction = (apsForProduction.integerValue != 0);
+    [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:isProduction];
+
     
 }
 #ifdef NSFoundationVersionNumber_iOS_9_x_Max
@@ -136,14 +133,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
         [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:UIApplicationStateActive];
         [JPUSHService handleRemoteNotification:userInfo];
-        NSLog(@"iOS10 前台收到远程通知:%@", userInfo);
-        
-        
-    }
-    else {
+        ACLogDebug(@"iOS10 前台收到远程通知:%@", userInfo);
+    }else {
         // 判断为本地通知
         [[JPushInstance sharedInstance] callbackLocalNotificationiOS10:content state:UIApplicationStateActive];
-        NSLog(@"iOS10 前台收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
+        ACLogDebug(@"iOS10 前台收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
     }
     completionHandler(UNNotificationPresentationOptionBadge|UNNotificationPresentationOptionSound|UNNotificationPresentationOptionAlert); // 需要执行这个方法，选择是否提醒用户，有Badge、Sound、Alert三种类型可以设置
 }
@@ -163,14 +157,11 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     if([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
         [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:UIApplicationStateInactive];
         [JPUSHService handleRemoteNotification:userInfo];
-        NSLog(@"iOS10 收到远程通知:%@", userInfo);
-        
-        
-    }
-    else {
+        ACLogDebug(@"iOS10 收到远程通知:%@", userInfo);
+    }else {
         // 判断为本地通知
         [[JPushInstance sharedInstance] callbackLocalNotificationiOS10:content state:UIApplicationStateInactive];
-        NSLog(@"iOS10 收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
+        ACLogDebug(@"iOS10 收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
     }
     
     completionHandler();  // 系统要求执行这个方法
@@ -313,8 +304,9 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     
 }
 -(void)serviceError:(NSNotification *)notification{
-//    NSLog(@"-----serviceError:%@",notification.userInfo);
-    [self occurrenceCallback:[NSString stringWithFormat:@"Service Error : %@",notification.userInfo]];
+    
+    ACLogError(@"JPUSH: serviceError: %@",notification.userInfo);
+
 }
 
 
@@ -373,10 +365,10 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 -(void)setAlias:(NSString *)alias AndTags:(NSSet*)tags Function:(ACJSFunctionRef *)fuc{
 
-    if (alias && tags == nil) {
+    if (alias && !tags) {
         self.functAlias = fuc;
     }
-    if (tags && alias == nil) {
+    if (tags && !alias) {
         self.functTags = fuc;
     }
     if (tags && alias) {
@@ -400,7 +392,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     return [JPUSHService registrationID];
 
 }
--(void)getConnectionStateWithfunction:(ACJSFunctionRef *)fuc{
+-(void)getConnectionStateWithCallbackFunction:(ACJSFunctionRef *)fuc{
     NSString *state=@"";
     if(self.connectionState){
         state=@"0";
@@ -457,10 +449,10 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     _notification = nil;
 }
 -(NSDictionary *)parseLocalNotificationiOS10:(UNNotificationContent*)content{
-    NSNumber *badge = content.badge?:@(0);  // 推送消息的角标
-    NSString *body = content.body?:@"";    // 推送消息体
-    NSString *subtitle = content.subtitle?:@"";  // 推送消息的副标题
-    NSString *title = content.title?:@"";  // 推送消息的标题
+    NSNumber *badge = content.badge ?: @(0);  // 推送消息的角标
+    NSString *body = content.body ?: @"";    // 推送消息体
+    NSString *subtitle = content.subtitle ?: @"";  // 推送消息的副标题
+    NSString *title = content.title ?: @"";  // 推送消息的标题
 
     
     NSMutableDictionary *dict=[NSMutableDictionary dictionary];
@@ -490,8 +482,8 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     return dict;
 }
 
-- (void)addLocalNotificationWithbroadCastTime:(NSDate*)time timeInterval:(NSTimeInterval)timeInterval
-                               notificationId:(NSString*)ID
+- (void)addLocalNotificationWithTimeInterval:(NSTimeInterval)timeInterval
+                               notificationId:(NSString *)ID
                                       content:(NSString *)body
                                        extras:(NSDictionary *)extras
                                         title:(NSString *)title{
@@ -506,14 +498,13 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
         trigger.timeInterval = timeInterval; // iOS10以上有效
     }
     else {
-        trigger.fireDate = time; // iOS10以下有效
+        trigger.fireDate = [NSDate dateWithTimeIntervalSinceNow:timeInterval]; // iOS10以下有效
     }
     JPushNotificationRequest *request = [[JPushNotificationRequest alloc] init];
     request.content = content;
     request.trigger = trigger;
     request.requestIdentifier = ID;
     request.completionHandler = ^(id result) {
-        NSLog(@"%@--%@", result,[result class]); // iOS10以上成功则result为UNNotificationRequest对象，失败则result为nil;iOS10以下成功result为UILocalNotification对象，失败则result为nil
         _notification = result;
         notificationDic = @{ID:_notification};
         
@@ -525,17 +516,15 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 -(void)removeLocalNotification:(NSString*)ID{
     if (_notification) {
-        NSLog(@"notification:%@====",_notification);
+
             JPushNotificationIdentifier *identifier = [[JPushNotificationIdentifier alloc] init];
-            if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0) {
+            if (ACSystemVersion() < 10.0) {
                 identifier.notificationObj = (UILocalNotification*)notificationDic[ID];
-            }
-            else {
+            } else {
 #ifdef NSFoundationVersionNumber_iOS_9_x_Max
                 UNNotificationRequest *request = (UNNotificationRequest *)notificationDic[ID];
                 identifier.identifiers = @[request.identifier];
                 identifier.delivered = NO;
-                NSLog(@"identifier.identifiers:%@==%@",request,ID);
 #endif
             }
        
@@ -557,7 +546,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 #pragma mark badge number
 
 -(void)setBadgeNumber:(NSInteger)bNum{
-    if(bNum<0){
+    if( bNum < 0){
         return;
     }
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:bNum];
@@ -571,23 +560,13 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
  
  */
 -(void) callbackJSONWithName:(NSString *)name Object:(id)obj{
-    
-    static NSString *plgName=@"uexJPush";
-    uexPluginCallbackType type = uexPluginCallbackWithJsonString;
-    [EUtility uexPlugin:plgName callbackByName:name withObject:obj andType:type inTarget:cUexPluginCallbackInRootWindow];
-    
-    
-
-    
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:[NSString stringWithFormat:@"uexJPush.%@",name] arguments:ACArgsPack([obj ac_JSONFragment])];
 }
 
 
 
 
 
-//测试用回调
--(void)occurrenceCallback:(NSString*)errorMsg{
-    [self callbackJSONWithName:@"onEventOccured" Object:errorMsg];
-}
+
 
 @end
