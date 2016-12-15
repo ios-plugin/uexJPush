@@ -11,54 +11,36 @@
 @interface JPushInstance : NSObject<JPUSHRegisterDelegate>
 
 
-typedef NS_ENUM(NSInteger,AliasAndTagsConfigStatus){
-    AliasAndTagsConfigStatusNeither      = 0,
-    AliasAndTagsConfigStatusOnlyAlias,
-    AliasAndTagsConfigStatusOnlyTags,
-    AliasAndTagsConfigStatusBoth
-    
-};
-
 
 
 
 @property (nonatomic,assign) BOOL connectionState;
-@property (nonatomic,assign) AliasAndTagsConfigStatus configStatus;
-@property (nonatomic,strong) NSDictionary *launchOptions;
-@property (nonatomic,assign) BOOL disableLocalNotificationAlertView;
+@property (nonatomic,assign) BOOL showNotificationAlertInForeground;
 
 
 
-+(instancetype)sharedInstance;
-- (void)activateNotifications;
-- (void)inactivateNotifications;
++ (instancetype)sharedInstance;
 
-
-- (void)setAlias:(NSString *)alias AndTags:(NSSet *)tags Function:(ACJSFunctionRef*)fuc;
-
-
-
-- (NSString*)getRegistrationID;
-- (void)getConnectionStateWithCallbackFunction:(ACJSFunctionRef *)callback;
-- (void)registerForRemoteNotification;
+- (void)notifyApplication:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;
+- (void)notifyRootPageDidFinishLoading;
+- (void)notifyApplication:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken;
+- (void)notifyApplication:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo;
+- (void)notifyApplication:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler: (void (^)(UIBackgroundFetchResult))completionHandler;
+- (void)notifyApplication:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification;
 
 - (void)addLocalNotificationWithTimeInterval:(NSTimeInterval)timeInterval
                               notificationId:(NSString *)ID
                                      content:(NSString *)body
                                       extras:(NSDictionary *)extras
                                        title:(NSString *)title;
-- (void)removeLocalNotification:(NSString *)ID;
-- (void)clearLocalNotifications;
+- (void)removeLocalNotificationWithID:(NSString *)ID;
+- (void)removeAllLocalNotifications;
 
 
 
-- (void)callbackRemoteNotification:(NSDictionary*)userinfo state:(UIApplicationState)state;
-- (void)callbackLocalNotification:(UILocalNotification*)notification state:(UIApplicationState)state;
-- (void)callbackJSONWithName:(NSString *)name Object:(id)dict;
 
 
 - (void)setBadgeNumber:(NSInteger)badge;
 
-- (void)wake;
 
 @end

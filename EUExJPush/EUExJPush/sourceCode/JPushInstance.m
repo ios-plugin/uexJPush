@@ -7,45 +7,28 @@
 //
 
 #import "JPushInstance.h"
+#import <AppCanKit/ACEXTScope.h>
 
 
+static NSString *const kReceiveNotificationCallbackKeyPath = @"uexJPush.onReceiveNotification";
+static NSString *const kReceiveNotificationOpenCallbackKeyPath = @"uexJPush.onReceiveNotificationOpen";
 
-NSString *const uexJPushOnReceiveNotificationCallbackKey=@"onReceiveNotification";
-NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotificationOpen";
+
 
 @interface JPushInstance ()
-@property (nonatomic,strong) ACJSFunctionRef *functBoth;
-@property (nonatomic,strong) ACJSFunctionRef *functTags;
-@property (nonatomic,strong) ACJSFunctionRef *functAlias;
+@property (nonatomic,strong)NSMutableDictionary *managedNotifications;
+@property (nonatomic,strong)void (^notificationLaunchBlock)();
 
 @end
-@implementation JPushInstance {
-    id _notification;
-    NSDictionary *notificationDic;
-}
+@implementation JPushInstance
 
 
 
 
 
--(void)wake{
-    if([self.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey]){
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(500 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-            [self callbackRemoteNotification:[self.launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey] state:UIApplicationStateInactive];
-        });
-    }
-    if([self.launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey]){
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(500 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-            [self callbackLocalNotification:[self.launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey] state:UIApplicationStateInactive];
-        });
-    }
-    
-    
-}
 
 #pragma mark sharedInstance
-+ (instancetype) sharedInstance
-{
++ (instancetype) sharedInstance{
     static JPushInstance *sharedObj= nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -56,124 +39,22 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
 
 
 
-- (instancetype)init
-{
-    
+- (instancetype)init{
     if (self = [super init]){
-        self.connectionState =NO;
-        self.configStatus=AliasAndTagsConfigStatusNeither;
         [self activateNotifications];
-        self.disableLocalNotificationAlertView=NO;
-
-        
+        _showNotificationAlertInForeground = YES;
+        _managedNotifications = [NSMutableDictionary dictionary];
     }
     
     return self;
 
 }
--(void)registerForRemoteNotification{
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 10.0) {
-#ifdef NSFoundationVersionNumber_iOS_9_x_Max
-        JPUSHRegisterEntity * entity = [[JPUSHRegisterEntity alloc] init];
-        entity.types = UNAuthorizationOptionAlert|UNAuthorizationOptionBadge|UNAuthorizationOptionSound;
-        [JPUSHService registerForRemoteNotificationConfig:entity delegate:self];
-       
-#endif
-    } else if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
-        //可以添加自定义categories
-        [JPUSHService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
-                                                          UIUserNotificationTypeSound |
-                                                          UIUserNotificationTypeAlert)
-                                              categories:nil];
-    } else {
-        //categories 必须为nil
-        [JPUSHService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
-                                                          UIRemoteNotificationTypeSound |
-                                                          UIRemoteNotificationTypeAlert)
-                                              categories:nil];
-    }
-    
-    //2.1.9版本新增获取registration id block接口。
-    [JPUSHService registrationIDCompletionHandler:^(int resCode, NSString *registrationID) {
-        if(resCode == 0){
-            ACLogDebug(@"JPUSH registrationID获取成功：%@",registrationID);
-        }
-        else{
-            ACLogDebug(@"JPUSH registrationID获取失败，code：%d",resCode);
-        }
-    }];
-    
-    
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"PushConfig" ofType:@"plist"];
-    NSDictionary *data = [NSDictionary dictionaryWithContentsOfFile:path];
-    
-    NSString *appKey = [data objectForKey:@"APP_KEY"];
-    NSString *channel = [data objectForKey:@"CHANNEL"];
-    NSString *apsForProduction = [data objectForKey:@"APS_FOR_PRODUCTION"];
-    BOOL isProduction = (apsForProduction.integerValue != 0);
-    [JPUSHService setupWithOption:[JPushInstance sharedInstance].launchOptions appKey:appKey channel:channel apsForProduction:isProduction];
-
-    
-}
-#ifdef NSFoundationVersionNumber_iOS_9_x_Max
-#pragma mark- JPUSHRegisterDelegate
-//App处于前台接收通知时
-- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(NSInteger))completionHandler {
-    NSDictionary * userInfo = notification.request.content.userInfo;
-    
-    UNNotificationRequest *request = notification.request; // 收到推送的请求
-    UNNotificationContent *content = request.content; // 收到推送的消息内容
-    
-    NSNumber *badge = content.badge;  // 推送消息的角标
-    NSString *body = content.body;    // 推送消息体
-    UNNotificationSound *sound = content.sound;  // 推送消息的声音
-    NSString *subtitle = content.subtitle;  // 推送消息的副标题
-    NSString *title = content.title;  // 推送消息的标题
-    
-    if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
-        [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:UIApplicationStateActive];
-        [JPUSHService handleRemoteNotification:userInfo];
-        ACLogDebug(@"iOS10 前台收到远程通知:%@", userInfo);
-    }else {
-        // 判断为本地通知
-        [[JPushInstance sharedInstance] callbackLocalNotificationiOS10:content state:UIApplicationStateActive];
-        ACLogDebug(@"iOS10 前台收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
-    }
-    completionHandler(UNNotificationPresentationOptionBadge|UNNotificationPresentationOptionSound|UNNotificationPresentationOptionAlert); // 需要执行这个方法，选择是否提醒用户，有Badge、Sound、Alert三种类型可以设置
-}
-////App通知的点击事件
-- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)())completionHandler {
-    
-    NSDictionary * userInfo = response.notification.request.content.userInfo;
-    UNNotificationRequest *request = response.notification.request; // 收到推送的请求
-    UNNotificationContent *content = request.content; // 收到推送的消息内容
-    
-    NSNumber *badge = content.badge;  // 推送消息的角标
-    NSString *body = content.body;    // 推送消息体
-    UNNotificationSound *sound = content.sound;  // 推送消息的声音
-    NSString *subtitle = content.subtitle;  // 推送消息的副标题
-    NSString *title = content.title;  // 推送消息的标题
-    
-    if([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
-        [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:UIApplicationStateInactive];
-        [JPUSHService handleRemoteNotification:userInfo];
-        ACLogDebug(@"iOS10 收到远程通知:%@", userInfo);
-    }else {
-        // 判断为本地通知
-        [[JPushInstance sharedInstance] callbackLocalNotificationiOS10:content state:UIApplicationStateInactive];
-        ACLogDebug(@"iOS10 收到本地通知:{\nbody:%@，\ntitle:%@,\nsubtitle:%@,\nbadge：%@，\nsound：%@，\nuserInfo：%@\n}",body,title,subtitle,badge,sound,userInfo);
-    }
-    
-    completionHandler();  // 系统要求执行这个方法
-}
-#endif
-
-#pragma mark Notifications
 
 
+
+#pragma mark - JPushEvent
 
 -(void)activateNotifications{
-//    NSLog(@"------activateNotifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     [defaultCenter addObserver:self
                       selector:@selector(networkDidSetup:)
@@ -200,287 +81,259 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
                           name:kJPFServiceErrorNotification
                         object:nil];
 }
--(void)inactivateNotifications{
-    NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-    [defaultCenter removeObserver:self
-                             name:kJPFNetworkDidSetupNotification
-                           object:nil];
-    [defaultCenter removeObserver:self
-                             name:kJPFNetworkDidCloseNotification
-                           object:nil];
-    [defaultCenter removeObserver:self
-                             name:kJPFNetworkDidRegisterNotification
-                           object:nil];
-    [defaultCenter removeObserver:self
-                             name:kJPFNetworkDidLoginNotification
-                           object:nil];
-    [defaultCenter removeObserver:self
-                             name:kJPFNetworkDidReceiveMessageNotification
-                           object:nil];
-    [defaultCenter removeObserver:self
-                             name:kJPFServiceErrorNotification
-                           object:nil];
-}
-
-//收到APNs推送
--(void)callbackRemoteNotification:(NSDictionary*)userinfo state:(UIApplicationState)state{
-    switch (state) {
-        case UIApplicationStateActive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
-            break;
-        }
-        case UIApplicationStateInactive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseRemoteNotification:userinfo]] ;
-            break;
-        }
-        case UIApplicationStateBackground: {
-            
-            //[self callbackJSONWithName:@"onReceiveNotificationBackground" Object:[self parseRemoteNotification:userinfo]] ;
-            break;
-        }
-    }
-    
-}
-
-
-
-
--(NSDictionary *)parseRemoteNotification:(NSDictionary*)userinfo{
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    NSMutableDictionary *extras=[NSMutableDictionary dictionary];
-    NSArray *keys=[userinfo allKeys];
-    
-    for(int i=0;i<[keys count];i++){
-        NSString *keyStr=keys[i];
-        if((![keyStr isEqual:@"aps"]) && (![keyStr isEqual:@"_j_msgid"])){
-            [extras setValue:[userinfo objectForKey:keyStr] forKey:keyStr];
-        }
-    }
-    NSDictionary *aps=[userinfo objectForKey:@"aps"];
-    [dict setValue:[aps objectForKey:@"alert"] forKey:@"content"];
-    [dict setValue:@(YES) forKey:@"isAPNs"];
-    [dict setValue:extras forKey:@"extras"];
-    return userinfo;
-
-}
-
 
 //收到自定义消息
 -(void)networkDidReceiveMessage:(NSNotification *)notification{
-    NSDictionary * userInfo = [notification userInfo];
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    NSString *content = [userInfo valueForKey:@"content"];
-    [dict setValue:content forKey:@"message"];
-    NSDictionary *extras = [userInfo valueForKey:@"extras"];
-    [dict setValue:extras forKey:@"extras"];
-    [self callbackJSONWithName:@"onReceiveMessage" Object:dict];
-   
+    NSDictionary * userInfo = notification.userInfo;
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setValue:userInfo[@"content"] forKey:@"message"];
+    [dict setValue:userInfo[@"extras"] forKey:@"extras"];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:@"uexJPush.onReceiveMessage" arguments:ACArgsPack(dict.ac_JSONFragment)];
+    
+    
 }
 
 -(void)networkDidSetup:(NSNotification *)notification{
-    self.connectionState=YES;
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    [dict setValue:@"0" forKey:@"connect"];
-    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
+    self.connectionState = YES;
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:@"uexJPush.onReceiveConnectionChange" arguments:ACArgsPack(@{@"connect": @0}.ac_JSONFragment)];
+    
 }
 
 -(void)networkDidClose:(NSNotification *)notification{
-    self.connectionState=NO;
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    [dict setValue:@"1" forKey:@"connect"];
-
-    [self callbackJSONWithName:@"onReceiveConnectionChange" Object:dict];
+    self.connectionState = NO;
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:@"uexJPush.onReceiveConnectionChange" arguments:ACArgsPack(@{@"connect": @1}.ac_JSONFragment)];
 }
 
 -(void)networkDidRegister:(NSNotification *)notification{
-//    NSLog(@"-----networkDidRegister:%@",notification.userInfo);
-   
+    
+    
 }
 -(void)networkDidLogin:(NSNotification *)notification{
-    NSMutableDictionary *registrationDict=[NSMutableDictionary dictionary];
-    [registrationDict setValue:[JPUSHService registrationID] forKey:@"title"];
-//    NSLog(@"-----onReceiveRegistration:%@",registrationDict);
-    [self callbackJSONWithName:@"onReceiveRegistration" Object:registrationDict];
+    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
+    [dict setValue:[JPUSHService registrationID] forKey:@"title"];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:@"uexJPush.onReceiveRegistration" arguments:ACArgsPack(dict.ac_JSONFragment)];
+    
     
 }
 -(void)serviceError:(NSNotification *)notification{
-    
     ACLogError(@"JPUSH: serviceError: %@",notification.userInfo);
-
 }
 
 
+#pragma mark - System Event
 
+- (void)notifyApplication:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"PushConfig" ofType:@"plist"];
+    NSDictionary *data = [NSDictionary dictionaryWithContentsOfFile:path];
+    
+    NSString *appKey = [data objectForKey:@"APP_KEY"];
+    NSString *channel = [data objectForKey:@"CHANNEL"];
+    NSString *apsForProduction = [data objectForKey:@"APS_FOR_PRODUCTION"];
+    BOOL isProduction = (apsForProduction.integerValue != 0);
+    [JPUSHService setupWithOption:launchOptions appKey:appKey channel:channel apsForProduction:isProduction];
 
-
-
-#pragma mark - alias and tags
-- (void)tagsAliasCallback:(int)iResCode
-                     tags:(NSSet *)tags
-                    alias:(NSString *)alias{
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
-    [dict setValue:[NSString stringWithFormat:@"%i",iResCode] forKey:@"result"];
-    NSNumber *error = @(iResCode);;
-    switch (self.configStatus) {
-        case AliasAndTagsConfigStatusBoth:
-            [dict setValue:alias forKey:@"alias"];
-            [dict setValue:[tags allObjects] forKey:@"tags"];
-            [self callbackJSONWithName:@"cbSetAliasAndTags" Object:dict];
-            
-            [resultDict setValue:alias forKey:@"alias"];
-            [resultDict setValue:[tags allObjects] forKey:@"tags"];
-            [self.functBoth executeWithArguments:ACArgsPack(error,resultDict)];
-            self.functBoth = nil;
-            
-            break;
-        case AliasAndTagsConfigStatusOnlyAlias :
-            [dict setValue:alias forKey:@"alias"];
-            [self callbackJSONWithName:@"cbSetAlias" Object:dict];
-            
-            [resultDict setValue:alias forKey:@"alias"];
-            [self.functAlias executeWithArguments:ACArgsPack(error,resultDict)];
-            self.functAlias = nil;
-            break;
-        case AliasAndTagsConfigStatusOnlyTags:
-            [dict setValue:[tags allObjects] forKey:@"tags"];
-            [self callbackJSONWithName:@"cbSetTags" Object:dict];
-            
-            [resultDict setValue:[tags allObjects] forKey:@"tags"];
-            [self.functTags executeWithArguments:ACArgsPack(error,resultDict)];
-            self.functTags = nil;
-            break;
-            
-            
-        case AliasAndTagsConfigStatusNeither: {
-            break;
-        }
-            
+    
+    
+    NSDictionary *result = nil;
+    if (launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
+        result = [self parseRemoteNotification:launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]];
+    }
+    if (launchOptions[UIApplicationLaunchOptionsLocalNotificationKey]) {
+        result = [self parseLocalNotification:launchOptions[UIApplicationLaunchOptionsLocalNotificationKey]];
     }
     
-    self.configStatus=AliasAndTagsConfigStatusNeither;
+    if (result) {
+        ACLogError(@"set notificationLaunchBlock");
+        self.notificationLaunchBlock = ^{
+            [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:kReceiveNotificationOpenCallbackKeyPath arguments:ACArgsPack(result.ac_JSONFragment)];
+        };
+    }
+
+
 }
 
-
-
--(void)setAlias:(NSString *)alias AndTags:(NSSet*)tags Function:(ACJSFunctionRef *)fuc{
-
-    if (alias && !tags) {
-        self.functAlias = fuc;
+- (void)notifyRootPageDidFinishLoading{
+    if (!(ACLogGlobalLogMode & ACLogLevelDebug)) {
+        [JPUSHService setLogOFF];
     }
-    if (tags && !alias) {
-        self.functTags = fuc;
+    if (self.notificationLaunchBlock) {
+        self.notificationLaunchBlock();
+        self.notificationLaunchBlock = nil;
     }
-    if (tags && alias) {
-        self.functBoth = fuc;
-    }
-    [JPUSHService setTags:[JPUSHService filterValidTags:tags]
-                    alias:alias
-         callbackSelector:@selector(tagsAliasCallback:tags:alias:)
-                   object:self];
-}
+    if (ACSystemVersion() >= 10.0) {
+        JPUSHRegisterEntity * entity = [[JPUSHRegisterEntity alloc] init];
+        entity.types = UNAuthorizationOptionAlert|UNAuthorizationOptionBadge|UNAuthorizationOptionSound;
+        [JPUSHService registerForRemoteNotificationConfig:entity delegate:self];
 
-
-
-
-
--(NSString*)getRegistrationID{
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-
-    [dict setValue:[JPUSHService registrationID] forKey:@"registrationID"];
-    [self callbackJSONWithName:@"cbGetRegistrationID" Object:dict];
-    return [JPUSHService registrationID];
-
-}
--(void)getConnectionStateWithCallbackFunction:(ACJSFunctionRef *)fuc{
-    NSString *state=@"";
-    if(self.connectionState){
-        state=@"0";
     }else{
-        state=@"1";
+        [JPUSHService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert)
+                                              categories:nil];
     }
-    NSNumber *error = @(state.intValue);
-    NSMutableDictionary *dict =[NSMutableDictionary dictionary];
-    [dict setValue:state forKey:@"result"];
-    [self callbackJSONWithName:@"cbGetConnectionState" Object:dict];
-    [fuc executeWithArguments:ACArgsPack(error)];
-}
-#pragma mark LocalNotifications
 
--(void)callbackLocalNotification:(UILocalNotification*)notification state:(UIApplicationState)state{
-    if(!self.disableLocalNotificationAlertView){
-           [JPUSHService showLocalNotificationAtFront:notification identifierKey:nil];
-    }
-    switch (state) {
-        case UIApplicationStateActive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotification:notification]];
-            break;
-        }
-        case UIApplicationStateInactive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotification:notification]];
-            break;
-        }
-        case UIApplicationStateBackground: {
-
-            break;
-        }
-
-    }
-    _notification = nil;
-
-}
-#ifdef NSFoundationVersionNumber_iOS_9_x_Max
--(void)callbackLocalNotificationiOS10:(UNNotificationContent*)content state:(UIApplicationState)state{
-    switch (state) {
-        case UIApplicationStateActive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationCallbackKey Object:[self parseLocalNotificationiOS10:content]];
-            break;
-        }
-        case UIApplicationStateInactive: {
-            [self callbackJSONWithName:uexJPushOnReceiveNotificationOpenCallbackKey Object:[self parseLocalNotificationiOS10:content]];
-            break;
-        }
-        case UIApplicationStateBackground: {
-            
-            break;
-        }
-            
-    }
-    _notification = nil;
-}
--(NSDictionary *)parseLocalNotificationiOS10:(UNNotificationContent*)content{
-    NSNumber *badge = content.badge ?: @(0);  // 推送消息的角标
-    NSString *body = content.body ?: @"";    // 推送消息体
-    NSString *subtitle = content.subtitle ?: @"";  // 推送消息的副标题
-    NSString *title = content.title ?: @"";  // 推送消息的标题
+    [JPUSHService registrationIDCompletionHandler:^(int resCode, NSString *registrationID) {
+        ACLogDebug(@"JPush -> fetch registrationID resCode:%@, id: %@",@(resCode),registrationID);
+    }];
 
     
-    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    [dict setValue:badge forKey:@"badge"];
-    [dict setValue:title forKey:@"title"];
-    [dict setValue:subtitle forKey:@"subtitle"];
-    [dict setValue:body forKey:@"content"];
-    [dict setValue:@(NO) forKey:@"isAPNs"];
-    return dict;
+}
+
+- (void)notifyApplication:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken{
+    
+    [JPUSHService registerDeviceToken:deviceToken];
+}
+
+
+
+- (void)notifyApplication:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification{
+    NSString *keyPath = (application.applicationState == UIApplicationStateInactive) ? kReceiveNotificationOpenCallbackKeyPath : kReceiveNotificationCallbackKeyPath;
+    NSDictionary *result = [self parseLocalNotification:notification];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keyPath arguments:ACArgsPack(result.ac_JSONFragment)];
     
 }
-#endif
--(NSDictionary *)parseLocalNotification:(UILocalNotification*)notification{
-    __block NSMutableDictionary *dict=[NSMutableDictionary dictionary];
-    __block NSMutableDictionary *extras=[NSMutableDictionary dictionary];
+
+
+- (NSDictionary *)parseLocalNotification:(UILocalNotification*)notification{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    NSMutableDictionary *extras = [NSMutableDictionary dictionary];
     NSDictionary *info = notification.userInfo;
     [info enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if([key isEqual:@"__JPFNotificationKey"]){
-            [dict setValue:@([obj integerValue]) forKey:@"notificationId"];
+            [dict setValue:obj forKey:@"notificationId"];
         }else{
             [extras setValue:obj forKey:key];
         }
     }];
+    [dict setValue:notification.alertTitle forKey:@"title"];
     [dict setValue:extras forKey:@"extras"];
     [dict setValue:notification.alertBody forKey:@"content"];
     [dict setValue:@(NO) forKey:@"isAPNs"];
     return dict;
 }
+
+
+
+
+
+- (void)notifyApplication:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler{
+    if (!userInfo[@"_j_msgid"]) {
+        return;
+    }
+    [self notifyApplication:application didReceiveRemoteNotification:userInfo];
+    completionHandler(UIBackgroundFetchResultNewData);
+}
+
+- (void)notifyApplication:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo{
+    if (!userInfo[@"_j_msgid"]) {
+        return;
+    }
+    
+    NSString *keyPath = (application.applicationState == UIApplicationStateInactive) ? kReceiveNotificationOpenCallbackKeyPath : kReceiveNotificationCallbackKeyPath;
+    NSDictionary *result = [self parseRemoteNotification:userInfo];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keyPath arguments:ACArgsPack(result.ac_JSONFragment)];
+    
+    [JPUSHService handleRemoteNotification:userInfo];
+}
+
+- (NSDictionary *)parseRemoteNotification:(NSDictionary *)userInfo{
+    ACLogError(@"parseRemoteNotification: %@",userInfo);
+
+    NSMutableDictionary *result = [NSMutableDictionary dictionary];
+    NSMutableDictionary *extras = [NSMutableDictionary dictionary];
+    
+    [userInfo enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if (![key isEqual:@"aps"] && ![key isEqual:@"_j_msgid"]) {
+            [extras setValue:obj forKey:key];
+        }
+    }];
+    
+    id alert = userInfo[@"aps"][@"alert"];
+    if ([alert isKindOfClass:[NSDictionary class]]) {
+        [result setValue:alert[@"body"] forKey:@"content"];
+        [result setValue:alert[@"title"] forKey:@"title"];
+        [result setValue:alert[@"subtitle"] forKey:@"subtitle"];
+    }
+    if ([alert isKindOfClass:[NSString class]]) {
+        [result setValue:alert forKey:@"content"];
+    }
+    [result setValue:extras forKey:@"extras"];
+    [result setValue:@(YES) forKey:@"isAPNs"];
+    [result setValue:userInfo[@"_j_msgid"] forKey:@"_j_msgid"];
+
+    return result;
+}
+
+
+#pragma mark - JPUSHRegisterDelegate
+//App处于前台接收通知时
+- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(NSInteger))completionHandler {
+
+    
+    NSDictionary *result = [self parseUserNotification:notification];
+
+    
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:kReceiveNotificationCallbackKeyPath arguments:ACArgsPack(result.ac_JSONFragment)];
+    UNNotificationPresentationOptions option = self.showNotificationAlertInForeground ? UNNotificationPresentationOptionBadge|UNNotificationPresentationOptionSound|UNNotificationPresentationOptionAlert : 0 ;
+
+    
+    completionHandler(option);
+
+}
+////App通知的点击事件
+- (void)jpushNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)())completionHandler {
+    
+    NSDictionary *result = [self parseUserNotification:response.notification];
+
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:kReceiveNotificationOpenCallbackKeyPath arguments:ACArgsPack(result.ac_JSONFragment)];
+
+    
+    completionHandler();
+}
+
+
+
+
+
+
+- (NSDictionary *)parseUserNotification:(UNNotification *)notification{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    NSMutableDictionary *extras = [NSMutableDictionary dictionary];
+    UNNotificationContent *content = notification.request.content;
+    
+    [content.userInfo enumerateKeysAndObjectsUsingBlock:^(NSString *_Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if (![key isEqual:@"aps"] && ![key isEqual:@"_j_msgid"]) {
+            [extras setValue:obj forKey:key];
+        }
+    }];
+    BOOL isAPNS = [notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]];
+    if (isAPNS) {
+        [JPUSHService handleRemoteNotification:content.userInfo];
+    }else{
+        [dict setValue:notification.request.identifier forKey:@"notificationId"];
+    }
+    
+    
+    [dict setValue:content.badge forKey:@"badge"];
+    [dict setValue:content.title forKey:@"title"];
+    [dict setValue:content.subtitle forKey:@"subtitle"];
+    [dict setValue:content.body forKey:@"content"];
+    [dict setValue:@(isAPNS) forKey:@"isAPNs"];
+    [dict setValue:extras forKey:@"extras"];
+    [dict setValue:content.userInfo[@"_j_msgid"] forKey:@"_j_msgid"];
+    return dict;
+}
+
+
+
+
+
+
+
+
+
+
+#pragma mark LocalNotifications
+
+
 
 - (void)addLocalNotificationWithTimeInterval:(NSTimeInterval)timeInterval
                                notificationId:(NSString *)ID
@@ -494,7 +347,7 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     content.body = body;
     content.badge = @(-1);
     JPushNotificationTrigger *trigger = [[JPushNotificationTrigger alloc] init];
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
+    if (ACSystemVersion() >= 10.0) {
         trigger.timeInterval = timeInterval; // iOS10以上有效
     }
     else {
@@ -505,62 +358,40 @@ NSString *const uexJPushOnReceiveNotificationOpenCallbackKey=@"onReceiveNotifica
     request.trigger = trigger;
     request.requestIdentifier = ID;
     request.completionHandler = ^(id result) {
-        _notification = result;
-        notificationDic = @{ID:_notification};
-        
+        [self.managedNotifications setValue:result forKey:ID];
     };
     [JPUSHService addNotification:request];
 }
 
+- (void)removeAllLocalNotifications{
+    [JPUSHService removeNotification:nil];
+    [self.managedNotifications removeAllObjects];
+}
 
-
--(void)removeLocalNotification:(NSString*)ID{
-    if (_notification) {
-
-            JPushNotificationIdentifier *identifier = [[JPushNotificationIdentifier alloc] init];
-            if (ACSystemVersion() < 10.0) {
-                identifier.notificationObj = (UILocalNotification*)notificationDic[ID];
-            } else {
-#ifdef NSFoundationVersionNumber_iOS_9_x_Max
-                UNNotificationRequest *request = (UNNotificationRequest *)notificationDic[ID];
-                identifier.identifiers = @[request.identifier];
-                identifier.delivered = NO;
-#endif
-            }
-       
-           [JPUSHService removeNotification:identifier];
-            _notification = nil;
-        
-       
-        
+- (void)removeLocalNotificationWithID:(NSString *)ID{
+    id notification = self.managedNotifications[ID];
+    if (!notification) {
+        return;
     }
-   
+    JPushNotificationIdentifier *identifier = [[JPushNotificationIdentifier alloc] init];
+    if (ACSystemVersion() < 10) {
+        identifier.notificationObj = notification;
+    }else{
+        identifier.identifiers = @[((UNNotificationRequest *)notification).identifier];
+    }
+    [JPUSHService removeNotification:identifier];
     
 }
 
--(void)clearLocalNotifications{
-   
-    [JPUSHService removeNotification:nil];
-}
 
 #pragma mark badge number
 
--(void)setBadgeNumber:(NSInteger)bNum{
-    if( bNum < 0){
+- (void)setBadgeNumber:(NSInteger)badgeNumber{
+    if( badgeNumber < 0){
         return;
     }
-    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:bNum];
-    [JPUSHService setBadge:bNum];
-}
-
-
-#pragma mark CallbackMethods
-/*
- 回调方法name(data)  方法名为name，参数为 字典dict的转成的json字符串
- 
- */
--(void) callbackJSONWithName:(NSString *)name Object:(id)obj{
-    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:[NSString stringWithFormat:@"uexJPush.%@",name] arguments:ACArgsPack([obj ac_JSONFragment])];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:badgeNumber];
+    [JPUSHService setBadge:badgeNumber];
 }
 
 

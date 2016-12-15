@@ -10,90 +10,49 @@
 #import "JPushInstance.h"
 
 @interface EUExJPush()
-@property (nonatomic,strong) JPushInstance *JPush;
+@property (nonatomic,weak) JPushInstance *JPush;
 @end
 @implementation EUExJPush
-- (id)initWithWebViewEngine:(id<AppCanWebViewEngineObject>)engine{
+- (instancetype)initWithWebViewEngine:(id<AppCanWebViewEngineObject>)engine{
     if (self = [super initWithWebViewEngine:engine]) {
         
         if(self){
-            _JPush=[JPushInstance sharedInstance];
+            _JPush = [JPushInstance sharedInstance];
             
         }
     }
     return self;
 }
-- (id)getDataFromJson:(NSString *)jsonData{
-    NSError *error = nil;
 
-
-
-    NSData *jsonData2= [jsonData dataUsingEncoding:NSUTF8StringEncoding];
-
-    id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData2
-
-                                                    options:NSJSONReadingMutableContainers
-
-                                                      error:&error];
-
-    if (jsonObject != nil && error == nil){
-
-        return jsonObject;
-    }else{
-
-        // 解析錯誤
-
-        return nil;
-    }
-
-}
 +(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
-    [[JPushInstance sharedInstance] setLaunchOptions:launchOptions];
+    
+    [[JPushInstance sharedInstance] notifyApplication:application didFinishLaunchingWithOptions:launchOptions];
     return YES;
 }
-static BOOL isRootPageFinish = NO;
+
 +(void)rootPageDidFinishLoading{
-    [[JPushInstance sharedInstance] registerForRemoteNotification];
-    isRootPageFinish = YES;
-    if (!(ACLogGlobalLogMode & ACLogLevelDebug)) {
-        [JPUSHService setLogOFF];
-    }
-    [[JPushInstance sharedInstance] wake];
-   
+    [[JPushInstance sharedInstance] notifyRootPageDidFinishLoading];
 }
 
 
 
 + (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    if (isRootPageFinish == TRUE) {
-        [JPUSHService registerDeviceToken:deviceToken];
-        
-    }
+    [[JPushInstance sharedInstance]notifyApplication:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+
 }
 
 +(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
-    [JPUSHService handleRemoteNotification:userInfo];
+     [[JPushInstance sharedInstance] notifyApplication:application didReceiveRemoteNotification:userInfo];
    
 }
 
 + (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler: (void (^)(UIBackgroundFetchResult))completionHandler {
-    [[JPushInstance sharedInstance] callbackRemoteNotification:userInfo state:application.applicationState];
-    [JPUSHService handleRemoteNotification:userInfo];
+    [[JPushInstance sharedInstance] notifyApplication:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
 
-
-    
-    completionHandler(UIBackgroundFetchResultNewData);
 }
 
 + (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
-    [[JPushInstance sharedInstance] callbackLocalNotification:notification state:application.applicationState];
-
-}
-
-
-
--(void)init:(NSMutableArray *)inArguments{
+    [[JPushInstance sharedInstance] notifyApplication:application didReceiveLocalNotification:notification];
 
 }
 
@@ -103,116 +62,91 @@ static BOOL isRootPageFinish = NO;
 
 
 
--(void)setAliasAndTags:(NSMutableArray *)inArguments{
-    if([inArguments count]<1) return;
+
+
+
+- (void)init:(NSMutableArray *)inArguments{
+
+}
+
+- (void)setAlias: (NSString *)alias tags:(NSSet *)tags callbackKeyPath:(NSString *)keypath callbackFunction:(ACJSFunctionRef *)function{
+    [JPUSHService setTags:tags alias:alias fetchCompletionHandle:^(int iResCode, NSSet *iTags, NSString *iAlias) {
+        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+        [dict setValue:@(iResCode) forKey:@"result"];
+        [dict setValue:iAlias forKey:@"alias"];
+        [dict setValue:iTags.allObjects forKey:@"tags"];
+        [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keypath arguments:ACArgsPack(dict.ac_JSONFragment)];
+        [function executeWithArguments:ACArgsPack(@(iResCode),dict)];
+    }];
+}
+
+
+
+
+
+- (void)setAliasAndTags:(NSMutableArray *)inArguments{
     ACArgsUnpack(NSDictionary *info) = inArguments;
-    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
-    NSString *alias=nil;
-    if([info objectForKey:@"alias"]){
-        alias=[info objectForKey:@"alias"];
-    }
-    NSArray *tags=nil;
-    if([info objectForKey:@"tags"]){
-        tags=[info objectForKey:@"tags"];
-    }
-    _JPush.configStatus=AliasAndTagsConfigStatusBoth;
-    [_JPush setAlias:alias AndTags:[NSSet setWithArray:tags] Function:func];
-    
-    
+    ACJSFunctionRef *callback = JSFunctionArg(inArguments.lastObject);
+    NSString *alias = stringArg(info[@"alias"]);
+    NSArray *tags = arrayArg(info[@"tags"]);
+    UEX_PARAM_GUARD_NOT_NIL(alias);
+    UEX_PARAM_GUARD_NOT_NIL(tags);
+    [self setAlias:alias tags:[NSSet setWithArray:tags] callbackKeyPath:@"uexJPush.cbSetAliasAndTags" callbackFunction:callback];
 }
 
 
 
-/*
- ###setAlias
- 
- */
 
-
-
--(void)setAlias:(NSMutableArray *)inArguments{
-    
-    if([inArguments count]<1) return;
+- (void)setAlias:(NSMutableArray *)inArguments{
     ACArgsUnpack(NSDictionary *info) = inArguments;
-    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
-    NSString *alias=nil;
-    if([info objectForKey:@"alias"]){
-        alias=[info objectForKey:@"alias"];
-    }
-    _JPush.configStatus=AliasAndTagsConfigStatusOnlyAlias;
-     [_JPush setAlias:alias AndTags:nil Function:func];
+    ACJSFunctionRef *callback = JSFunctionArg(inArguments.lastObject);
+    NSString *alias = stringArg(info[@"alias"]);
+    UEX_PARAM_GUARD_NOT_NIL(alias);
+    [self setAlias:alias tags:nil callbackKeyPath:@"uexJPush.cbSetAlias" callbackFunction:callback];
     
     
 }
 
 
 
-/*
- ###setTags
- 
- */
-
-
-
--(void)setTags:(NSMutableArray *)inArguments{
-    if([inArguments count]<1) return;
+- (void)setTags:(NSMutableArray *)inArguments{
     ACArgsUnpack(NSDictionary *info) = inArguments;
-    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
-
-    NSArray *tags=nil;
-    if([info objectForKey:@"tags"]){
-        tags=[info objectForKey:@"tags"];
-    }
-    _JPush.configStatus=AliasAndTagsConfigStatusOnlyTags;
-     [_JPush setAlias:nil AndTags:[NSSet setWithArray:tags] Function:func];
-    
+    ACJSFunctionRef *callback = JSFunctionArg(inArguments.lastObject);
+    NSArray *tags = arrayArg(info[@"tags"]);
+    UEX_PARAM_GUARD_NOT_NIL(tags);
+    [self setAlias:nil tags:[NSSet setWithArray:tags] callbackKeyPath:@"uexJPush.cbSetTags" callbackFunction:callback];
     
     
 }
 
 
 
-/*
- ###getRegistrationID
- 
- */
+- (NSString *)getRegistrationID:(NSMutableArray *)inArguments{
+    NSMutableDictionary *dict=[NSMutableDictionary dictionary];
+    NSString *registrationID = [JPUSHService registrationID];
+    [dict setValue:registrationID forKey:@"registrationID"];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:@"uexJPush.cbGetRegistrationID" arguments:ACArgsPack(dict.ac_JSONFragment)];
 
-
-
--(NSString*)getRegistrationID:(NSMutableArray *)inArguments{
-    
-    NSString *registrationID = [_JPush getRegistrationID];
     return registrationID;
-    
 }
 
 
 
 
-
-
-
-
-
-
-/*
- ###getConnectionState
- 
- */
-
-
-
--(void)getConnectionState:(NSMutableArray *)inArguments{
+- (void)getConnectionState:(NSMutableArray *)inArguments{
     
-    ACJSFunctionRef *func = JSFunctionArg(inArguments.lastObject);
-    [_JPush getConnectionStateWithCallbackFunction:func];
-    
+    ACJSFunctionRef *callback = JSFunctionArg(inArguments.lastObject);
+    NSNumber *state = _JPush.connectionState ? @0 : @1;
+    NSMutableDictionary *dict =[NSMutableDictionary dictionary];
+    [dict setValue:state forKey:@"result"];
+    [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:@"uexJPush.cbGetConnectionState" arguments:ACArgsPack(dict.ac_JSONFragment)];
+    [callback executeWithArguments:ACArgsPack(state)];
     
 }
 
 
 
--(void)addLocalNotification:(NSMutableArray *)inArguments{
+- (void)addLocalNotification:(NSMutableArray *)inArguments{
     
 
     ACArgsUnpack(NSDictionary *info) = inArguments;
@@ -230,31 +164,39 @@ static BOOL isRootPageFinish = NO;
 
 
 
--(void)removeLocalNotification:(NSMutableArray *)inArguments{
+- (void)removeLocalNotification:(NSMutableArray *)inArguments{
     ACArgsUnpack(NSDictionary *info) = inArguments;
     NSString *notificationId = stringArg(info[@"notificationId"]);
-    [_JPush removeLocalNotification:notificationId];
+    [_JPush removeLocalNotificationWithID:notificationId];
 }
 
 
 
--(void)clearLocalNotifications:(NSMutableArray *)inArguments{
-    [_JPush clearLocalNotifications];
+- (void)clearLocalNotifications:(NSMutableArray *)inArguments{
+    [_JPush removeAllLocalNotifications];
     
     
 }
 
 
--(void)setBadgeNumber:(NSMutableArray *)inArguments{
+- (void)setBadgeNumber:(NSMutableArray *)inArguments{
     ACArgsUnpack(NSNumber *number) = inArguments;
     [_JPush setBadgeNumber:number.integerValue];
 }
 
--(void)disableLocalNotificationAlertView:(NSMutableArray *)inArguments{
+- (void)disableLocalNotificationAlertView:(NSMutableArray *)inArguments{
     ACArgsUnpack(NSNumber *flag) = inArguments;
     UEX_PARAM_GUARD_NOT_NIL(flag);
-    [JPushInstance sharedInstance].disableLocalNotificationAlertView = flag.boolValue;
-
-    
+    [JPushInstance sharedInstance].showNotificationAlertInForeground = !flag.boolValue;
 }
+
+
+- (void)showNotificationAlertInForeground:(NSMutableArray *)inArguments{
+    ACArgsUnpack(NSNumber *flag) = inArguments;
+    UEX_PARAM_GUARD_NOT_NIL(flag)
+    [JPushInstance sharedInstance].showNotificationAlertInForeground = flag.boolValue;
+}
+
+
+
 @end

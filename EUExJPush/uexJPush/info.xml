@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="4.0.0" build="0">
-        <info>0:插件4.0，更新JPush SDK到2.2.0</info>
+        uexName="uexJPush" version="4.0.1" build="1">
+        <info>1:更新JPush SDK至3.0.0</info>
+        <build>0: 极光推送插件</build>
     </plugin>
 </uexplugins>
