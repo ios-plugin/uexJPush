@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="3.0.10.1" build="2018050901">
-        <info>10:更新JPush传入jsonData类型兼容处理</info>
+        uexName="uexJPush" version="3.0.11" build="2018051401">
+        <info>11:更新JPush SDK到3.0.5 -稳定性提升。2.1.9支持iOS10, 3.0.0不支持xcode8以下，开启bitcode</info>
+        <build>10:更新JPush传入jsonData类型兼容处理</build>
+        <build>9:更新JPush SDK到2.1.7 -支持IPv6</build>
+        uexName="uexJPush" version="3.0.10" build="2017062801">
+        <info>10:更新JPush SDK到3.0.5 -稳定性提升。2.1.9支持iOS10, 3.0.0不支持xcode8以下，开启bitcode</info>
         <build>9:更新JPush SDK到2.1.7 -支持IPv6</build>
         <build>8:更新JPush SDK到2.1.6</build>
         <build>7:现在应用在后台时，点击推送，会正确的触发onReceiveNotificationOpen</build>
