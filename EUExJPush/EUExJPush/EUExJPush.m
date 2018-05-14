@@ -42,10 +42,17 @@
 //从json字符串中获取数据
 - (id)getDataFromJson:(NSString *)jsonData{
     NSError *error = nil;
+    NSData *jsonData2 ;
     
+    if ([[jsonData class] isSubclassOfClass:[NSDictionary class]])
+    {
+        jsonData2= [[jsonData JSONRepresentation] dataUsingEncoding:NSUTF8StringEncoding];
+    }
+    else
+    {
+        jsonData2= [jsonData dataUsingEncoding:NSUTF8StringEncoding];
+    }
     
-    
-    NSData *jsonData2= [jsonData dataUsingEncoding:NSUTF8StringEncoding];
     
     id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData2
                      
