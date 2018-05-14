@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="3.0.10" build="10">
+        uexName="uexJPush" version="3.0.10.1" build="2018050901">
         <info>10:更新JPush传入jsonData类型兼容处理</info>
         <build>9:更新JPush SDK到2.1.7 -支持IPv6</build>
         <build>8:更新JPush SDK到2.1.6</build>
