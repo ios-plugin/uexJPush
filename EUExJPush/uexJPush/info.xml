@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexJPush" version="4.0.1" build="1">
-        <info>1:更新JPush SDK至3.0.0</info>
+        uexName="uexJPush" version="4.0.4" build="4">
+        <info>4:更新JPush SDK至3.1.2,更换调用该接口会覆盖用户所有的tags的方法</info>
+        <build>3:打包失败bug对应</build>
+        <build>2:更新JPush SDK至3.1.0,setAliasandTags方法不在支持</build>
+        <build>1:更新JPush SDK至3.0.0</build>
         <build>0: 极光推送插件</build>
     </plugin>
 </uexplugins>

@@ -13,6 +13,9 @@
 @property (nonatomic,weak) JPushInstance *JPush;
 @end
 @implementation EUExJPush
+
+static NSInteger seq = 0; //序列号
+
 - (instancetype)initWithWebViewEngine:(id<AppCanWebViewEngineObject>)engine{
     if (self = [super initWithWebViewEngine:engine]) {
         
@@ -58,31 +61,36 @@
 
 
 
-
-
-
-
-
-
-
 - (void)init:(NSMutableArray *)inArguments{
 
 }
 
 - (void)setAlias: (NSString *)alias tags:(NSSet *)tags callbackKeyPath:(NSString *)keypath callbackFunction:(ACJSFunctionRef *)function{
-    [JPUSHService setTags:tags alias:alias fetchCompletionHandle:^(int iResCode, NSSet *iTags, NSString *iAlias) {
+    //3.0.0的方法
+//    [JPUSHService setTags:tags alias:alias fetchCompletionHandle:^(int iResCode, NSSet *iTags, NSString *iAlias) {
+//        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+//        [dict setValue:@(iResCode) forKey:@"result"];
+//        [dict setValue:iAlias forKey:@"alias"];
+//        [dict setValue:iTags.allObjects forKey:@"tags"];
+//        [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keypath arguments:ACArgsPack(dict.ac_JSONFragment)];
+//        [function executeWithArguments:ACArgsPack(@(iResCode),dict)];
+//    }];
+    
+    [JPUSHService setTags:tags completion:^(NSInteger iResCode, NSSet *iTags, NSInteger seq) {
+       
         NSMutableDictionary *dict = [NSMutableDictionary dictionary];
         [dict setValue:@(iResCode) forKey:@"result"];
-        [dict setValue:iAlias forKey:@"alias"];
+        [dict setValue:alias forKey:@"alias"];
         [dict setValue:iTags.allObjects forKey:@"tags"];
         [AppCanRootWebViewEngine() callbackWithFunctionKeyPath:keypath arguments:ACArgsPack(dict.ac_JSONFragment)];
         [function executeWithArguments:ACArgsPack(@(iResCode),dict)];
-    }];
+        
+    } seq:[self seq]];//seq：请求序列号
 }
 
-
-
-
+- (NSInteger)seq {
+    return ++ seq;
+}
 
 - (void)setAliasAndTags:(NSMutableArray *)inArguments{
     ACArgsUnpack(NSDictionary *info) = inArguments;
@@ -93,8 +101,6 @@
     UEX_PARAM_GUARD_NOT_NIL(tags);
     [self setAlias:alias tags:[NSSet setWithArray:tags] callbackKeyPath:@"uexJPush.cbSetAliasAndTags" callbackFunction:callback];
 }
-
-
 
 
 - (void)setAlias:(NSMutableArray *)inArguments{
