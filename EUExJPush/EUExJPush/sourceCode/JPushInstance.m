@@ -10,6 +10,7 @@
 #import <AppCanKit/ACEXTScope.h>
 
 
+
 static NSString *const kReceiveNotificationCallbackKeyPath = @"uexJPush.onReceiveNotification";
 static NSString *const kReceiveNotificationOpenCallbackKeyPath = @"uexJPush.onReceiveNotificationOpen";
 

@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4209B02E1E0263E900E655A2 /* jcore-ios-1.0.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4209B02B1E0263E900E655A2 /* jcore-ios-1.0.0.a */; };
-		4209B02F1E0263E900E655A2 /* jpush-ios-3.0.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4209B02C1E0263E900E655A2 /* jpush-ios-3.0.0.a */; };
 		42EF949B1DFBAA8C0087D468 /* AppCanKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42EF949A1DFBAA8C0087D468 /* AppCanKit.framework */; };
 		C63A9F201B0987CC00CFD409 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F1F1B0987CC00CFD409 /* CFNetwork.framework */; };
 		C63A9F221B0987D200CFD409 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F211B0987D200CFD409 /* CoreFoundation.framework */; };
@@ -20,6 +18,8 @@
 		C63A9F2E1B0987FC00CFD409 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C63A9F2D1B0987FC00CFD409 /* Security.framework */; };
 		C63A9F371B0989FF00CFD409 /* EUExJPush.m in Sources */ = {isa = PBXBuildFile; fileRef = C63A9F361B0989FF00CFD409 /* EUExJPush.m */; };
 		C63A9F571B09E27100CFD409 /* JPushInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = C63A9F561B09E27100CFD409 /* JPushInstance.m */; };
+		C646F3EC21CA4D11008972E6 /* jpush-ios-3.1.2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C646F3EA21CA4D10008972E6 /* jpush-ios-3.1.2.a */; };
+		C646F3ED21CA4D11008972E6 /* jcore-ios-1.2.6.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C646F3EB21CA4D10008972E6 /* jcore-ios-1.2.6.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,9 +35,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4209B02B1E0263E900E655A2 /* jcore-ios-1.0.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "jcore-ios-1.0.0.a"; sourceTree = "<group>"; };
-		4209B02C1E0263E900E655A2 /* jpush-ios-3.0.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "jpush-ios-3.0.0.a"; sourceTree = "<group>"; };
-		4209B02D1E0263E900E655A2 /* JPUSHService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPUSHService.h; sourceTree = "<group>"; };
 		42EF949A1DFBAA8C0087D468 /* AppCanKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppCanKit.framework; sourceTree = "<group>"; };
 		C62DD77D1B0981AB00E7EBD8 /* libuexJPush.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libuexJPush.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		C63A9F1F1B0987CC00CFD409 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -53,6 +50,11 @@
 		C63A9F421B099C0600CFD409 /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		C63A9F551B09E27100CFD409 /* JPushInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPushInstance.h; sourceTree = "<group>"; };
 		C63A9F561B09E27100CFD409 /* JPushInstance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JPushInstance.m; sourceTree = "<group>"; };
+		C646F3D621CA39E5008972E6 /* JPUSHService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPUSHService.h; sourceTree = "<group>"; };
+		C646F3D721CA39E5008972E6 /* jpush-extension-ios-1.1.1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "jpush-extension-ios-1.1.1.a"; sourceTree = "<group>"; };
+		C646F3DE21CA3A97008972E6 /* Readme */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Readme; sourceTree = "<group>"; };
+		C646F3EA21CA4D10008972E6 /* jpush-ios-3.1.2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "jpush-ios-3.1.2.a"; path = "../../Desktop/插件项目调试/激光推送uexJPush/jpush-ios-3.1.2-release/Lib/jpush-ios-3.1.2.a"; sourceTree = "<group>"; };
+		C646F3EB21CA4D10008972E6 /* jcore-ios-1.2.6.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "jcore-ios-1.2.6.a"; path = "../../Desktop/插件项目调试/激光推送uexJPush/jpush-ios-3.1.2-release/Lib/jcore-ios-1.2.6.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,17 +62,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C646F3EC21CA4D11008972E6 /* jpush-ios-3.1.2.a in Frameworks */,
+				C646F3ED21CA4D11008972E6 /* jcore-ios-1.2.6.a in Frameworks */,
 				C63A9F2E1B0987FC00CFD409 /* Security.framework in Frameworks */,
 				C63A9F2C1B0987F400CFD409 /* UIKit.framework in Frameworks */,
 				C63A9F2A1B0987ED00CFD409 /* Foundation.framework in Frameworks */,
 				42EF949B1DFBAA8C0087D468 /* AppCanKit.framework in Frameworks */,
 				C63A9F281B0987E800CFD409 /* CoreGraphics.framework in Frameworks */,
-				4209B02E1E0263E900E655A2 /* jcore-ios-1.0.0.a in Frameworks */,
 				C63A9F261B0987E200CFD409 /* SystemConfiguration.framework in Frameworks */,
 				C63A9F241B0987DA00CFD409 /* CoreTelephony.framework in Frameworks */,
 				C63A9F221B0987D200CFD409 /* CoreFoundation.framework in Frameworks */,
 				C63A9F201B0987CC00CFD409 /* CFNetwork.framework in Frameworks */,
-				4209B02F1E0263E900E655A2 /* jpush-ios-3.0.0.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,9 +129,9 @@
 		C62DD7B71B09854600E7EBD8 /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				4209B02B1E0263E900E655A2 /* jcore-ios-1.0.0.a */,
-				4209B02C1E0263E900E655A2 /* jpush-ios-3.0.0.a */,
-				4209B02D1E0263E900E655A2 /* JPUSHService.h */,
+				C646F3DE21CA3A97008972E6 /* Readme */,
+				C646F3D721CA39E5008972E6 /* jpush-extension-ios-1.1.1.a */,
+				C646F3D621CA39E5008972E6 /* JPUSHService.h */,
 			);
 			path = lib;
 			sourceTree = "<group>";
@@ -137,6 +139,8 @@
 		C63A9F1E1B0987B100CFD409 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C646F3EB21CA4D10008972E6 /* jcore-ios-1.2.6.a */,
+				C646F3EA21CA4D10008972E6 /* jpush-ios-3.1.2.a */,
 				C63A9F2D1B0987FC00CFD409 /* Security.framework */,
 				C63A9F2B1B0987F400CFD409 /* UIKit.framework */,
 				C63A9F291B0987ED00CFD409 /* Foundation.framework */,
@@ -303,6 +307,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "";
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/EUExJPush/engineHeader",
@@ -327,6 +332,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "";
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/EUExJPush/engineHeader",
